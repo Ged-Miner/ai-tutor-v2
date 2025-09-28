@@ -1,0 +1,148 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String?
+  role          Role      @default(STUDENT)
+  teacherCode   String?   @unique
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  courses       Course[]
+  enrollments   Enrollment[]
+  chatSessions  ChatSession[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Course {
+  id          String    @id @default(cuid())
+  teacherId   String
+  name        String
+  description String?
+  settings    Json?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  teacher     User      @relation(fields: [teacherId], references: [id])
+  lessons     Lesson[]
+  enrollments Enrollment[]
+
+  @@index([teacherId])
+  @@map("courses")
+}
+
+model Lesson {
+  id            String    @id @default(cuid())
+  courseId      String
+  title         String
+  rawTranscript String    @db.Text
+  summary       String?   @db.Text
+  lessonCode    String    @unique
+  position      Int
+  customPrompt  String?   @db.Text
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  course        Course    @relation(fields: [courseId], references: [id])
+  chatSessions  ChatSession[]
+
+  @@index([courseId])
+  @@index([lessonCode])
+  @@map("lessons")
+}
+
+model Enrollment {
+  id         String   @id @default(cuid())
+  studentId  String
+  courseId   String
+  enrolledAt DateTime @default(now())
+
+  student    User     @relation(fields: [studentId], references: [id])
+  course     Course   @relation(fields: [courseId], references: [id])
+
+  @@unique([studentId, courseId])
+  @@index([studentId])
+  @@index([courseId])
+  @@map("enrollments")
+}
+
+model ChatSession {
+  id        String   @id @default(cuid())
+  lessonId  String
+  studentId String
+  messages  Json[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lesson    Lesson   @relation(fields: [lessonId], references: [id])
+  student   User     @relation(fields: [studentId], references: [id])
+
+  @@index([lessonId])
+  @@index([studentId])
+  @@map("chat_sessions")
+}
+
+model SystemPrompt {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  content   String   @db.Text
+  version   Int      @default(1)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("system_prompts")
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
