@@ -1,60 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Tutor 2.0
+
+An educational web application that integrates with Chrome extension to automatically create AI-powered lesson chat rooms from live classroom transcripts.
+
+## Tech Stack
+
+- **Frontend/Backend**: Next.js 15.5.4 with TypeScript
+- **Database**: PostgreSQL 17 (Docker)
+- **ORM**: Prisma
+- **Authentication**: NextAuth.js v5
+- **Real-time**: Socket.io
+- **AI**: OpenAI API
+- **Styling**: Tailwind CSS
+
+## Prerequisites
+
+- Node.js 20+
+- Docker & Docker Compose
+- Git
 
 ## Getting Started
 
-First, run the development server:
-
+### 1. Clone and Install
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+git clone <your-repo-url>
+cd ai-tutor-v2
+npm install
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+# Database Configuration
+DB_USER=postgres
+DB_PASSWORD=devpassword123
+DB_NAME=ai_tutor
+DATABASE_URL=postgresql://postgres:devpassword123@localhost:5433/ai_tutor
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# NextAuth Configuration
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-super-secret-key-change-this-in-production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# pgAdmin Configuration
+PGADMIN_EMAIL=admin@example.com
+PGADMIN_PASSWORD=admin123
 
-## Learn More
+# OpenAI Configuration
+OPENAI_API_KEY=your-openai-api-key-here
 
-To learn more about Next.js, take a look at the following resources:
+# Socket.io Configuration
+SOCKET_PORT=3001
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-```
-ai-tutor-v2
-├─ README.md
-├─ eslint.config.mjs
-├─ next.config.ts
-├─ package-lock.json
-├─ package.json
-├─ postcss.config.mjs
-├─ public
-│  ├─ file.svg
-│  ├─ globe.svg
-│  ├─ next.svg
-│  ├─ vercel.svg
-│  └─ window.svg
-├─ src
-│  └─ app
-│     ├─ favicon.ico
-│     ├─ globals.css
-│     ├─ layout.tsx
-│     └─ page.tsx
-└─ tsconfig.json
-
-```
+DATABASE_URL=postgresql://postgres:devpassword123@localhost:5433/ai_tutor
