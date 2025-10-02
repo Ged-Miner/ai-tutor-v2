@@ -25,6 +25,7 @@ async function main() {
       email: 'admin@aitutor.com',
       name: 'Admin User',
       role: Role.ADMIN,
+      password: adminPassword,  // Add this line
     },
   });
 
@@ -37,15 +38,18 @@ async function main() {
       name: 'Prof. John Smith',
       role: Role.TEACHER,
       teacherCode: 'TEACH001',
+      password: teacher1Password,  // Add this line
     },
   });
 
+  const teacher2Password = await bcrypt.hash('teacher123', 10);  // Add this variable
   const teacher2 = await prisma.user.create({
     data: {
       email: 'sarah.jones@university.edu',
       name: 'Dr. Sarah Jones',
       role: Role.TEACHER,
       teacherCode: 'TEACH002',
+      password: teacher2Password,  // Add this line
     },
   });
 
@@ -58,6 +62,7 @@ async function main() {
         email: 'alice@student.edu',
         name: 'Alice Chen',
         role: Role.STUDENT,
+        password: studentPassword,  // Add this line
       },
     }),
     prisma.user.create({
@@ -65,6 +70,7 @@ async function main() {
         email: 'bob@student.edu',
         name: 'Bob Wilson',
         role: Role.STUDENT,
+        password: studentPassword,  // Add this line
       },
     }),
     prisma.user.create({
@@ -72,6 +78,7 @@ async function main() {
         email: 'charlie@student.edu',
         name: 'Charlie Brown',
         role: Role.STUDENT,
+        password: studentPassword,  // Add this line
       },
     }),
   ]);
