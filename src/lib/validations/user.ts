@@ -45,7 +45,8 @@ export const updateUserSchema = z.object({
     .string()
     .min(8, 'Password must be at least 8 characters')
     .max(100, 'Password must be less than 100 characters')
-    .optional(),
+    .optional()
+    .or(z.literal('')), // Allow empty string
   role: z
     .enum(['ADMIN', 'TEACHER', 'STUDENT'])
     .optional(),
@@ -55,6 +56,12 @@ export const updateUserSchema = z.object({
     .regex(/^TEACH\d{3}$/, 'Teacher code must follow format: TEACHxxx')
     .optional()
     .nullable(),
+}).transform((data) => {
+  // Transform empty password to undefined (no change)
+  if (data.password === '') {
+    return { ...data, password: undefined };
+  }
+  return data;
 });
 
 export type CreateUserInput = z.infer<typeof createUserSchema>;
