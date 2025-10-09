@@ -128,10 +128,9 @@ export default function DeleteUserModal({ isOpen, onClose, user }: DeleteUserMod
                       </svg>
                       <div className="ml-3">
                         <h4 className="text-sm font-medium text-red-800">
-                          Cannot delete user with related data
+                          Warning! This user has related data:
                         </h4>
                         <div className="mt-2 text-sm text-red-700">
-                          <p>This user has:</p>
                           <ul className="list-disc list-inside mt-1 space-y-1">
                             {user._count.courses > 0 && (
                               <li>{user._count.courses} course{user._count.courses !== 1 ? 's' : ''}</li>
@@ -144,7 +143,7 @@ export default function DeleteUserModal({ isOpen, onClose, user }: DeleteUserMod
                             )}
                           </ul>
                           <p className="mt-2">
-                            Please remove or reassign this data before deleting the user.
+                            Back up critical data before deleting user.
                           </p>
                         </div>
                       </div>
@@ -179,7 +178,7 @@ export default function DeleteUserModal({ isOpen, onClose, user }: DeleteUserMod
                 <button
                   type="button"
                   onClick={handleDelete}
-                  disabled={isDeleting || hasRelatedData}
+                  disabled={isDeleting}
                   className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isDeleting ? 'Deleting...' : 'Delete User'}

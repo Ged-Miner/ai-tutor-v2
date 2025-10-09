@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -71,7 +68,7 @@ model Course {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  teacher     User      @relation(fields: [teacherId], references: [id])
+  teacher     User      @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   lessons     Lesson[]
   enrollments Enrollment[]
 
@@ -91,7 +88,7 @@ model Lesson {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  course        Course    @relation(fields: [courseId], references: [id])
+  course        Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
   chatSessions  ChatSession[]
 
   @@index([courseId])
@@ -105,8 +102,8 @@ model Enrollment {
   courseId   String
   enrolledAt DateTime @default(now())
 
-  student    User     @relation(fields: [studentId], references: [id])
-  course     Course   @relation(fields: [courseId], references: [id])
+  student    User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, courseId])
   @@index([studentId])
@@ -122,8 +119,8 @@ model ChatSession {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  lesson    Lesson   @relation(fields: [lessonId], references: [id])
-  student   User     @relation(fields: [studentId], references: [id])
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@index([lessonId])
   @@index([studentId])

@@ -259,85 +259,51 @@ export async function DELETE(
 ) {
   try {
     const session = await auth();
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    if (session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Forbidden - Admin access required' },
-        { status: 403 }
-      );
+    if (!session?.user || session.user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id } = await params;
 
-    // Prevent admin from deleting themselves
-    if (id === session.user.id) {
+    // Prevent self-deletion
+    if (session.user.id === id) {
       return NextResponse.json(
-        { error: 'Cannot delete your own account' },
+        { error: 'You cannot delete your own account' },
         { status: 400 }
       );
     }
 
-    // Check if user exists
-    const existingUser = await prisma.user.findUnique({
+    // Get user with counts for confirmation display
+    const user = await prisma.user.findUnique({
       where: { id },
       include: {
-        _count: {
-          select: {
-            courses: true,
-            enrollments: true,
-            chatSessions: true,
-          },
-        },
+        courses: true,
+        enrollments: true,
+        chatSessions: true,
       },
     });
 
-    if (!existingUser) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Check if user has related data (optional: you could allow cascade delete)
-    const hasRelatedData =
-      existingUser._count.courses > 0 ||
-      existingUser._count.enrollments > 0 ||
-      existingUser._count.chatSessions > 0;
-
-    if (hasRelatedData) {
-      return NextResponse.json(
-        {
-          error: 'Cannot delete user with existing courses, enrollments, or chat sessions',
-          details: {
-            courses: existingUser._count.courses,
-            enrollments: existingUser._count.enrollments,
-            chatSessions: existingUser._count.chatSessions,
-          }
-        },
-        { status: 409 }
-      );
-    }
-
-    // Delete user
+    // Delete user - cascade will handle related records
     await prisma.user.delete({
       where: { id },
     });
 
-    return NextResponse.json(
-      { message: 'User deleted successfully' },
-      { status: 200 }
-    );
+    return NextResponse.json({
+      success: true,
+      deleted: {
+        courses: user.courses.length,
+        enrollments: user.enrollments.length,
+        chatSessions: user.chatSessions.length,
+      }
+    });
   } catch (error) {
     console.error('Error deleting user:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to delete user' },
       { status: 500 }
     );
   }
