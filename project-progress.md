@@ -1,6 +1,6 @@
 # AI Tutor 2.0 - Project Progress
 
-**Last Updated:** October 4, 2025
+**Last Updated:** October 9, 2025
 **Development Timeline:** Started September 29, 2025
 **Target Completion:** December 15, 2025
 
@@ -10,25 +10,25 @@
 
 We are rebuilding AI Tutor from scratch using modern technologies, with an emphasis on hands-on learning of Docker, PostgreSQL administration, and DevOps practices. The application will integrate with a Chrome extension to automatically capture classroom transcripts and create AI-powered lesson chat rooms for students.
 
-**Current Status:** ✅ **Phase 1 & 2 Complete** - Foundation and Authentication Done
-**Progress:** ~35% complete (3 of 7 weeks)
+**Current Status:** âœ… **Phase 2 Complete** - Foundation, Authentication, and User Management Done
+**Progress:** ~45% complete (4 of 7 weeks)
 
 ---
 
-## ✅ Completed Work
+## âœ… Completed Work
 
 ### Phase 1, Week 1: Docker Environment Setup (COMPLETE)
 
 **Objectives:** Set up development environment with Docker and PostgreSQL
 
 **Accomplishments:**
-- ✅ Next.js 15.5.4 project initialized with TypeScript, Tailwind CSS, ESLint
-- ✅ Docker Compose configuration for local development
-- ✅ PostgreSQL 17 running in Docker container (port 5433 to avoid conflicts)
-- ✅ pgAdmin 4 for database GUI management (http://localhost:5050)
-- ✅ Environment configuration (.env and .env.local files)
-- ✅ Verified database connectivity from Next.js
-- ✅ Test API endpoint (`/api/test`) confirming database connection
+- âœ… Next.js 15.5.4 project initialized with TypeScript, Tailwind CSS, ESLint
+- âœ… Docker Compose configuration for local development
+- âœ… PostgreSQL 17 running in Docker container (port 5433 to avoid conflicts)
+- âœ… pgAdmin 4 for database GUI management (http://localhost:5050)
+- âœ… Environment configuration (.env and .env.local files)
+- âœ… Verified database connectivity from Next.js
+- âœ… Test API endpoint (`/api/test`) confirming database connection
 
 **Key Technical Decisions:**
 - Using port 5433 for Docker PostgreSQL to avoid conflicts with system PostgreSQL
@@ -39,7 +39,7 @@ We are rebuilding AI Tutor from scratch using modern technologies, with an empha
 - `docker-compose.yml` - Multi-service Docker configuration
 - `.env` and `.env.local` - Environment variables
 - `src/lib/prisma.ts` - Prisma client singleton
-- Database management scripts (see below)
+- Database management scripts
 
 ---
 
@@ -50,7 +50,7 @@ We are rebuilding AI Tutor from scratch using modern technologies, with an empha
 **Accomplishments:**
 
 **Database Schema:**
-- ✅ 8 complete models with proper relationships and indexes:
+- âœ… 8 complete models with proper relationships and indexes:
   - `User` - Multi-role support (ADMIN, TEACHER, STUDENT) with OAuth + credentials
   - `Account` - OAuth provider accounts (NextAuth integration)
   - `Session` - User sessions (NextAuth integration)
@@ -61,7 +61,7 @@ We are rebuilding AI Tutor from scratch using modern technologies, with an empha
   - `SystemPrompt` - Admin-editable AI prompts (tutor behavior, transcript processing)
 
 **Seed Data:**
-- ✅ Comprehensive seed script with realistic test data:
+- âœ… Comprehensive seed script with realistic test data:
   - 1 Admin user (admin@aitutor.com)
   - 2 Teachers with unique teacher codes
   - 3 Students enrolled in various courses
@@ -70,24 +70,13 @@ We are rebuilding AI Tutor from scratch using modern technologies, with an empha
   - 6 Enrollments across students and courses
   - 2 System prompts (tutor behavior and transcript summarization)
   - 1 Sample chat session with realistic conversation
-- ✅ All users have bcrypt-hashed passwords
+- âœ… All users have bcrypt-hashed passwords
 
 **Database Management:**
-- ✅ Automated backup script (`scripts/backup-db.sh`)
-  - Daily backups with compression
-  - Auto-cleanup of backups older than 30 days
-  - Timestamp-based file naming
-- ✅ Database restore script (`scripts/restore-db.sh`)
-  - Safety confirmation before restore
-  - Handles compressed backups
-- ✅ Quick reset script (`scripts/reset-db.sh`)
-  - Drops, recreates, migrates, and seeds in one command
-- ✅ Prisma Studio launcher (`scripts/db-studio.sh`)
-
-**Development Tools:**
-- ✅ Seed check endpoint (`/api/seed-check`) to view database contents
-- ✅ Complete README.md with all commands and workflows
-- ✅ Prisma migrations version controlled
+- âœ… Automated backup script (`scripts/backup-db.sh`)
+- âœ… Database restore script (`scripts/restore-db.sh`)
+- âœ… Quick reset script (`scripts/reset-db.sh`)
+- âœ… Prisma Studio launcher (`scripts/db-studio.sh`)
 
 **Files Created:**
 - `prisma/schema.prisma` - Complete database schema
@@ -107,57 +96,38 @@ We are rebuilding AI Tutor from scratch using modern technologies, with an empha
 **Accomplishments:**
 
 **NextAuth.js v5 Configuration:**
-- ✅ NextAuth.js v5 (beta.29) with Prisma adapter
-- ✅ JWT session strategy for performance
-- ✅ Custom TypeScript type definitions for extended User model
-- ✅ Auth configuration in `src/auth.ts`
-- ✅ API route handler at `/api/auth/[...nextauth]`
+- âœ… NextAuth.js v5 (beta.29) with Prisma adapter
+- âœ… JWT session strategy for performance
+- âœ… Custom TypeScript type definitions for extended User model
+- âœ… Auth configuration in `src/auth.ts`
+- âœ… API route handler at `/api/auth/[...nextauth]`
 
 **Authentication Providers:**
-- ✅ Credentials provider (email/password)
-  - Bcrypt password hashing and verification
-  - Secure credential validation
-- ✅ Google OAuth provider (configured, needs client credentials to test)
-  - Auto-detects AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET env vars
+- âœ… Credentials provider (email/password with bcrypt)
+- âœ… Google OAuth provider configured
 
 **Role-Based Access Control:**
-- ✅ Three user roles: ADMIN, TEACHER, STUDENT
-- ✅ Role information stored in JWT tokens
-- ✅ Role-based dashboard layouts and navigation
-- ✅ Session callbacks for custom user data (role, teacherCode)
+- âœ… Three user roles: ADMIN, TEACHER, STUDENT
+- âœ… Role information stored in JWT tokens
+- âœ… Role-based dashboard layouts and navigation
+- âœ… Session callbacks for custom user data
 
 **Authentication UI:**
-- ✅ Custom sign-in page (`/auth/signin`)
-  - Email/password form
-  - Google OAuth button
-  - Demo credentials display
-  - Error handling
-- ✅ Error page (`/auth/error`) with user-friendly messages
-- ✅ Sign-up placeholder page (`/auth/signup`)
+- âœ… Custom sign-in page with email/password form
+- âœ… Google OAuth button
+- âœ… Error page with user-friendly messages
+- âœ… Sign-up placeholder page
 
 **Protected Routes:**
-- ✅ Dashboard layout with authentication check
-- ✅ Server-side session validation
-- ✅ Automatic redirect to sign-in for unauthenticated users
-- ✅ Role-specific navigation menus
+- âœ… Dashboard layout with authentication check
+- âœ… Server-side session validation
+- âœ… Automatic redirect to sign-in
+- âœ… Role-specific navigation menus
 
 **Dashboard Implementation:**
-- ✅ Admin Dashboard:
-  - System statistics (users, courses, lessons, chat sessions)
-  - Links to user management and system prompts
-- ✅ Teacher Dashboard:
-  - List of teacher's courses
-  - Course statistics (lesson count, student count)
-  - Links to course and lesson management
-- ✅ Student Dashboard:
-  - Enrolled courses
-  - Teacher information
-  - Lesson availability
-  - Links to chat interface
-
-**Components:**
-- ✅ SignOutButton component (client-side with CSRF protection)
-- ✅ TypeScript types for dashboard data structures
+- âœ… Admin Dashboard (system statistics)
+- âœ… Teacher Dashboard (courses and lessons)
+- âœ… Student Dashboard (enrolled courses)
 
 **Files Created:**
 - `src/auth.ts` - NextAuth configuration
@@ -170,47 +140,115 @@ We are rebuilding AI Tutor from scratch using modern technologies, with an empha
 - `src/app/dashboard/layout.tsx` - Protected dashboard layout
 - `src/app/dashboard/page.tsx` - Role-based dashboard
 - `src/components/sign-out-button.tsx` - Sign out component
-- Updated `src/app/page.tsx` - Home page with auth-aware links
-
-**Security Features:**
-- ✅ CSRF protection on sign-out
-- ✅ Secure password hashing with bcrypt (10 rounds)
-- ✅ JWT token signing with AUTH_SECRET
-- ✅ Protected API routes and pages
 
 ---
 
-## 🚧 In Progress / Next Steps
+### Phase 2, Week 4: User Management & CRUD Operations (COMPLETE)
 
-### Phase 2, Week 4: User Management & Core Features (NEXT)
+**Objectives:** Build complete admin user management with CRUD operations
 
-**Objectives:** Build CRUD interfaces for managing users, courses, and lessons
+**Accomplishments:**
 
-**Planned Tasks:**
-- [ ] Admin user management interface
-  - Create, read, update, delete users
-  - Role assignment
-  - Teacher code generation
-- [ ] Teacher course management
-  - Create/edit courses
-  - Course settings and descriptions
-  - Student enrollment management
-- [ ] Teacher lesson management
-  - Manual lesson creation (before Chrome extension)
-  - Lesson ordering and organization
-  - Edit lesson summaries
-- [ ] Student enrollment flow
-  - Join course via teacher code
-  - View course details before enrolling
-- [ ] Form validation with Zod
-- [ ] Loading states and error handling
-- [ ] Optimistic UI updates
+**Dependencies Installed:**
+- âœ… `react-hook-form` - Form state management
+- âœ… `zod` - Schema validation
+- âœ… `@hookform/resolvers` - React Hook Form + Zod integration
 
-**Estimated Time:** 1 week
+**API Endpoints Created:**
+- âœ… `GET /api/admin/users` - Fetch all users with counts
+- âœ… `POST /api/admin/users` - Create new user
+- âœ… `GET /api/admin/users/[id]` - Fetch single user
+- âœ… `PUT /api/admin/users/[id]` - Update user
+- âœ… `DELETE /api/admin/users/[id]` - Delete user
+- âœ… `GET /api/admin/generate-teacher-code` - Generate unique teacher codes
+
+**Validation Schemas:**
+- âœ… `createUserSchema` - Validates new user creation
+- âœ… `updateUserSchema` - Validates user updates
+  - Supports optional fields
+  - Empty password = no password change
+  - Teacher code validation for TEACHER role
+- âœ… TypeScript types auto-generated from schemas
+
+**Utility Functions:**
+- âœ… `generateTeacherCode()` - Random teacher code generation (TEACH###)
+- âœ… Collision detection and fallback logic
+- âœ… Handles up to 999 unique teacher codes
+
+**Admin UI Components:**
+- âœ… `AdminUsersPage` - Main users page with stats and table
+  - Stats cards showing user counts by role
+  - Responsive users table
+  - Activity indicators (courses, enrollments, chats)
+  - Join date display
+  - Empty state handling
+- âœ… `CreateUserButton` - Opens create modal
+- âœ… `UserFormModal` - Create new user form
+  - Role-based field visibility
+  - Teacher code generation button
+  - Real-time validation
+  - Error handling
+- âœ… `EditUserModal` - Edit existing user form
+  - Pre-filled with current data
+  - Optional password update
+  - Role change handling
+  - Teacher code management
+- âœ… `DeleteUserModal` - Confirmation dialog
+  - Shows user information
+  - Prevents deletion of users with related data
+  - Warning messages for related courses/enrollments
+  - Self-delete prevention for admins
+- âœ… `UsersTable` - Client component for table interactions
+
+**Features Implemented:**
+- âœ… Full CRUD operations (Create, Read, Update, Delete)
+- âœ… Form validation with helpful error messages
+- âœ… Loading states during async operations
+- âœ… Success feedback with automatic page refresh
+- âœ… Role-specific business logic:
+  - Teacher code required only for TEACHER role
+  - Teacher code auto-removed when changing from TEACHER
+  - Duplicate email/teacher code prevention
+- âœ… Data integrity protection:
+  - Cannot delete users with courses, enrollments, or chats
+  - Clear error messages explaining why deletion failed
+- âœ… Professional UI with Tailwind CSS:
+  - Modal overlays with backdrop
+  - Color-coded role badges
+  - Responsive design
+  - Hover states and transitions
+
+**Technical Learnings:**
+- âœ… Using `Prisma.UserUpdateInput` instead of `any` for type safety
+- âœ… Zod schema transforms for empty string to undefined
+- âœ… Next.js 15 async params pattern (`await params`)
+- âœ… Client/Server component separation in App Router
+- âœ… Form state management with React Hook Form
+- âœ… Optimistic UI updates with router.refresh()
+
+**Files Created:**
+- `src/lib/validations/user.ts` - Zod schemas
+- `src/lib/utils/generate-teacher-code.ts` - Teacher code generator
+- `src/app/api/admin/users/route.ts` - Users list and create
+- `src/app/api/admin/users/[id]/route.ts` - Single user operations
+- `src/app/api/admin/generate-teacher-code/route.ts` - Code generation
+- `src/app/admin/users/page.tsx` - Main users page
+- `src/components/admin/user-form-modal.tsx` - Create form
+- `src/components/admin/edit-user-modal.tsx` - Edit form
+- `src/components/admin/delete-user-modal.tsx` - Delete confirmation
+- `src/components/admin/create-user-button.tsx` - Button wrapper
+- `src/components/admin/users-table.tsx` - Table component
+
+**Bugs Fixed:**
+- âœ… TypeScript `any` type replaced with proper Prisma types
+- âœ… Password validation allowing empty string for no change
+- âœ… Next.js 15 async params warnings resolved
 
 ---
 
-### Phase 3, Week 5: Real-time Chat with Socket.io (UPCOMING)
+## ðŸš§ In Progress / Next Steps
+
+### Phase 3, Week 5: Real-time Chat with Socket.io (NEXT)
 
 **Objectives:** Implement real-time WebSocket communication for AI tutoring
 
@@ -243,23 +281,17 @@ We are rebuilding AI Tutor from scratch using modern technologies, with an empha
 **Planned Tasks:**
 - [ ] OpenAI API integration
 - [ ] System prompt management (admin-editable)
-- [ ] Transcript processing pipeline:
-  - Accept raw transcript from Chrome extension
-  - Generate formatted markdown summary
-  - Extract key concepts and topics
-- [ ] Chat message generation:
-  - Context-aware responses using lesson content
-  - Restrict AI to lesson topics
-  - Encourage step-by-step thinking
-- [ ] Streaming responses for better UX
+- [ ] Transcript processing pipeline
+- [ ] Chat message generation with context
+- [ ] Streaming responses
 - [ ] Rate limiting and error handling
 - [ ] Token usage tracking
 - [ ] Prompt versioning system
 
 **API Endpoints Needed:**
 - `POST /api/transcript/upload` - Receive transcript from Chrome extension
-- `POST /api/transcript/process` - Generate summary from raw transcript
-- `POST /api/chat/message` - Send message to AI, get response
+- `POST /api/transcript/process` - Generate summary
+- `POST /api/chat/message` - AI responses
 
 **Estimated Time:** 1 week
 
@@ -271,26 +303,13 @@ We are rebuilding AI Tutor from scratch using modern technologies, with an empha
 
 **Planned Tasks:**
 - [ ] API endpoints for Chrome extension
-  - Authentication (JWT tokens)
-  - Transcript upload
-  - Lesson creation
-- [ ] CORS configuration for extension requests
+- [ ] CORS configuration
 - [ ] Rate limiting
-- [ ] Request validation with Zod
-- [ ] Handle multiple transcript uploads for same lesson
-- [ ] Automatic chat room creation:
-  - Process transcript → generate summary
-  - Create lesson record
-  - Make available to enrolled students
-- [ ] Mock Chrome extension for testing (until real one available)
+- [ ] Request validation
+- [ ] Handle multiple transcript uploads
+- [ ] Automatic chat room creation
+- [ ] Mock extension for testing
 - [ ] Error handling and retry logic
-
-**Data Flow:**
-1. Extension captures live transcript in Google Docs
-2. Teacher ends lesson → extension uploads transcript
-3. Backend processes transcript → generates summary
-4. Auto-creates lesson chat room with summary
-5. Students can access for Q&A
 
 **Estimated Time:** 1 week
 
@@ -301,275 +320,170 @@ We are rebuilding AI Tutor from scratch using modern technologies, with an empha
 **Objectives:** Implement remaining product features
 
 **Planned Tasks:**
-- [ ] Text selection → AI query feature:
-  - Special text selection in summary panel
-  - Query AI about selected text
-  - Max selection size limits
-  - Integration with chat window
-- [ ] Pre-lesson preparation wizard:
-  - Teacher chat interface for lesson setup
-  - Multiple file upload capability
-  - AI-assisted lesson prompt generation
-  - Material upload integration
-- [ ] Teacher prompt customization:
-  - Per-teacher core prompt editing
-  - Per-lesson prompt overrides
-  - Admin control over customization permissions
-- [ ] Lesson reordering (drag-and-drop)
-- [ ] Improved UI/UX:
-  - Markdown rendering in chat
-  - Weblink support in chat
-  - Better chat length handling
-  - Simplified lesson creation workflow
-- [ ] Tab system for Summary vs Raw Transcript views
-- [ ] Link to original Google Doc in transcript
+- [ ] Text selection → AI query feature
+- [ ] Pre-lesson preparation wizard
+- [ ] Teacher prompt customization
+- [ ] Lesson reordering
+- [ ] Improved UI/UX
+- [ ] Markdown rendering in chat
+- [ ] Tab system for Summary vs Raw Transcript
+- [ ] Link to original Google Doc
 
 **Estimated Time:** 1-2 weeks
 
 ---
 
-### Phase 7, Week 7: Deployment & DevOps (FINAL)
+### Phase 7: Deployment & DevOps (FINAL)
 
 **Objectives:** Deploy to production VPS with proper DevOps setup
 
 **Planned Tasks:**
+- [ ] Provision VPS (Hetzner ~$4-5/month)
+- [ ] Server hardening (SSH, firewall, fail2ban)
+- [ ] Docker and Docker Compose setup
+- [ ] Nginx reverse proxy
+- [ ] SSL with Let's Encrypt
+- [ ] Automated backups
+- [ ] Monitoring setup
+- [ ] CI/CD pipeline (optional)
 
-**VPS Setup (Hetzner):**
-- [ ] Provision VPS (~$4-5/month)
-- [ ] Initial server hardening
-  - SSH key setup
-  - Disable password authentication
-  - Configure firewall (UFW)
-  - Fail2ban setup
-- [ ] Install Docker and Docker Compose
-- [ ] Set up user accounts and permissions
-
-**Application Deployment:**
-- [ ] Configure production docker-compose.yml
-- [ ] Set up environment variables securely
-- [ ] Deploy PostgreSQL container
-- [ ] Deploy Next.js application container
-- [ ] Configure container networking
-
-**Web Server & SSL:**
-- [ ] Install and configure Nginx reverse proxy
-- [ ] Domain name configuration (DNS)
-- [ ] SSL certificates with Let's Encrypt
-- [ ] HTTPS redirect setup
-- [ ] WebSocket proxy configuration for Socket.io
-
-**Monitoring & Backups:**
-- [ ] Automated database backups with cron
-- [ ] Backup upload to cloud storage (optional)
-- [ ] Log rotation setup
-- [ ] Uptime monitoring (Uptime Kuma or similar)
-- [ ] Resource monitoring (disk, memory, CPU)
-- [ ] Error tracking integration (Sentry free tier)
-
-**CI/CD (Optional):**
-- [ ] GitHub Actions for automated deployment
-- [ ] Automated testing pipeline
-- [ ] Docker image building and pushing
-
-**Documentation:**
-- [ ] Production deployment guide
-- [ ] Backup and restore procedures
-- [ ] Monitoring and maintenance guide
-- [ ] Troubleshooting guide
-
-**Estimated Time:** 1 week (more if new to DevOps)
+**Estimated Time:** 1 week
 
 ---
 
-## 📊 Overall Progress Summary
+## ðŸ"Š Overall Progress Summary
 
-### Completed (Weeks 1-3)
-- ✅ Development environment with Docker
-- ✅ PostgreSQL database with complete schema
-- ✅ Prisma ORM with migrations and seed data
-- ✅ Database backup/restore workflow
-- ✅ NextAuth.js v5 authentication
-- ✅ Role-based access control
-- ✅ Protected dashboard with role-specific views
-- ✅ Authentication UI (sign-in, error pages)
+### Completed (Weeks 1-4)
+- âœ… Development environment with Docker ✅
+- âœ… PostgreSQL database with complete schema ✅
+- âœ… Prisma ORM with migrations and seed data ✅
+- âœ… Database backup/restore workflow ✅
+- âœ… NextAuth.js v5 authentication ✅
+- âœ… Role-based access control ✅
+- âœ… Protected dashboard with role-specific views ✅
+- âœ… Authentication UI ✅
+- âœ… **Complete user management system** ✅
+- âœ… **CRUD operations for users** ✅
+- âœ… **Form validation with Zod** ✅
+- âœ… **Teacher code generation** ✅
+- âœ… **Professional admin interface** ✅
 
-### In Progress / Next (Weeks 4-7)
-- 🚧 User and course management interfaces (Week 4)
-- ⏳ Real-time chat with Socket.io (Week 5)
-- ⏳ AI integration with OpenAI (Week 6)
-- ⏳ Chrome extension API endpoints (Week 6)
-- ⏳ Advanced features (text selection, wizard) (Week 6)
-- ⏳ VPS deployment with Docker (Week 7)
+### In Progress / Next (Weeks 5-7)
+- ðŸš§ Real-time chat with Socket.io (Week 5) - **NEXT**
+- â³ AI integration with OpenAI (Week 6)
+- â³ Chrome extension API endpoints (Week 6)
+- â³ Advanced features (Week 6)
+- â³ VPS deployment with Docker (Week 7)
 
 ### Timeline
-- **Weeks 1-3:** ✅ Complete (Sept 29 - Oct 4, 2025)
-- **Weeks 4-7:** 🚧 In Progress (Oct 5 - Nov 1, 2025)
+- **Weeks 1-4:** âœ… Complete (Sept 29 - Oct 9, 2025)
+- **Weeks 5-7:** ðŸš§ In Progress (Oct 10 - Nov 1, 2025)
 - **Buffer Time:** Nov 2 - Dec 15, 2025
 - **Target Launch:** December 15, 2025
 
 ---
 
-## 🎯 Success Criteria
+## ðŸŽ¯ Success Criteria
 
 ### Technical Goals
-- ✅ Docker containers running smoothly in development
-- ✅ PostgreSQL with proper indexing and relationships
-- ✅ Automated backup system
-- ✅ Working authentication with multiple providers
-- ⏳ Real-time WebSocket communication
-- ⏳ AI-powered chat responses
-- ⏳ Chrome extension integration
-- ⏳ Production deployment on VPS
-- ⏳ <200ms API response time
-- ⏳ 99% uptime
-- ⏳ Automated daily backups
+- âœ… Docker containers running smoothly ✅
+- âœ… PostgreSQL with proper indexing ✅
+- âœ… Automated backup system ✅
+- âœ… Working authentication ✅
+- âœ… Complete user management CRUD ✅
+- âœ… Form validation and error handling ✅
+- â³ Real-time WebSocket communication
+- â³ AI-powered chat responses
+- â³ Chrome extension integration
+- â³ Production deployment on VPS
+- â³ <200ms API response time
+- â³ 99% uptime
 
 ### Learning Goals
-- ✅ Docker fundamentals and container orchestration
-- ✅ PostgreSQL administration
-- ✅ Database design patterns
-- ✅ NextAuth.js authentication patterns
-- ✅ Role-based security
-- ⏳ WebSocket protocols and real-time communication
-- ⏳ AI API integration
-- ⏳ Linux server administration
-- ⏳ DevOps practices (CI/CD, monitoring, backups)
-- ⏳ Production infrastructure management
+- âœ… Docker fundamentals ✅
+- âœ… PostgreSQL administration ✅
+- âœ… Database design patterns ✅
+- âœ… NextAuth.js authentication ✅
+- âœ… Role-based security ✅
+- âœ… React Hook Form + Zod validation ✅
+- âœ… TypeScript best practices ✅
+- âœ… Next.js 15 App Router patterns ✅
+- â³ WebSocket protocols
+- â³ AI API integration
+- â³ Linux server administration
+- â³ DevOps practices
 
 ### Business Goals
-- ⏳ Support 100-200 concurrent users
-- ⏳ Automatic lesson creation from transcripts
-- ⏳ AI tutor responds to student questions
-- ⏳ Teachers can customize AI behavior
-- ⏳ Students can access lesson content post-class
-- ⏳ Stay within ¥10,000/month (~$65-70 USD) budget
+- â³ Support 100-200 concurrent users
+- â³ Automatic lesson creation from transcripts
+- â³ AI tutor responds to student questions
+- âœ… Teachers can manage users ✅
+- â³ Students can access lesson content
+- â³ Stay within Â¥10,000/month budget
 
 ---
 
-## 📝 Notes & Decisions
+## ðŸ" Notes & Decisions
 
 ### Technology Choices
-- **Next.js 15.5.4:** Latest stable version, excellent TypeScript support
-- **PostgreSQL 17:** Powerful relational database, self-hosted for learning
-- **Prisma:** Type-safe ORM with excellent DX
-- **NextAuth.js v5:** Modern auth solution, multiple provider support
-- **Socket.io:** Industry standard for WebSockets
-- **Hetzner VPS:** Best price/performance ratio for deployment
+- **Next.js 15.5.4:** Latest stable, excellent TypeScript support ✅
+- **PostgreSQL 17:** Powerful relational database ✅
+- **Prisma:** Type-safe ORM ✅
+- **NextAuth.js v5:** Modern auth solution ✅
+- **React Hook Form:** Industry standard form library ✅
+- **Zod:** TypeScript-first validation ✅
+- **Tailwind CSS:** Utility-first styling ✅
+- **Socket.io:** WebSocket standard (upcoming)
 
 ### Port Assignments
 - `3000` - Next.js development server
 - `5432` - PostgreSQL (internal to Docker)
-- `5433` - PostgreSQL (external access, avoiding system conflicts)
+- `5433` - PostgreSQL (external access)
 - `5050` - pgAdmin web interface
-- `5555` - Prisma Studio (when running)
+- `5555` - Prisma Studio
 - `3001` - Socket.io server (planned)
 
 ### Demo Accounts
-All demo accounts use password format: `{role}123`
+All passwords: `{role}123`
 
-**Admin:**
-- Email: admin@aitutor.com
-- Password: admin123
-
-**Teachers:**
-- Email: john.smith@university.edu (Code: TEACH001)
-- Password: teacher123
-- Email: sarah.jones@university.edu (Code: TEACH002)
-- Password: teacher123
-
-**Students:**
-- Email: alice@student.edu
-- Password: student123
-- Email: bob@student.edu
-- Password: student123
-- Email: charlie@student.edu
-- Password: student123
+**Admin:** admin@aitutor.com
+**Teachers:** john.smith@university.edu (TEACH001), sarah.jones@university.edu (TEACH002)
+**Students:** alice@student.edu, bob@student.edu, charlie@student.edu
 
 ---
 
-## 🔗 Quick Reference Links
+## ðŸ"— Quick Reference Links
 
 ### Local Development
 - Main App: http://localhost:3000
+- Admin Users: http://localhost:3000/admin/users
 - Sign In: http://localhost:3000/auth/signin
 - Dashboard: http://localhost:3000/dashboard
 - pgAdmin: http://localhost:5050
-- Prisma Studio: http://localhost:5555 (when running `npm run prisma studio`)
 
 ### API Endpoints
-- Test: http://localhost:3000/api/test
-- Seed Check: http://localhost:3000/api/seed-check
-- Auth: http://localhost:3000/api/auth/*
-
-### Documentation
-- [Next.js Docs](https://nextjs.org/docs)
-- [Prisma Docs](https://www.prisma.io/docs)
-- [NextAuth.js Docs](https://next-auth.js.org/)
-- [Socket.io Docs](https://socket.io/docs/v4/)
-- [Docker Docs](https://docs.docker.com/)
+- Users List: http://localhost:3000/api/admin/users
+- Generate Code: http://localhost:3000/api/admin/generate-teacher-code
 
 ---
 
-## 🐛 Known Issues & Technical Debt
+## ðŸ› Known Issues & Technical Debt
 
 ### Current Issues
-- None currently! 🎉
+- None currently! ðŸŽ‰
 
 ### Future Considerations
 - Add password reset functionality
-- Add email verification for new accounts
-- Implement account linking (connect OAuth to existing credential account)
+- Add email verification
+- Implement account linking (OAuth to credentials)
 - Add two-factor authentication
-- Implement soft deletes for important records
-- Add audit logging for admin actions
-- Consider Redis for session caching at scale
-- Implement read replicas for database scaling
+- Implement soft deletes
+- Add audit logging
+- Consider Redis for session caching
+- Implement read replicas for scaling
 
 ---
 
-## 📚 Files Changed Per Week
+## ðŸ"š Key Files by Week
 
-### Week 1 Files
-```
-docker-compose.yml
-.env
-.env.local
-src/lib/prisma.ts
-src/app/api/test/route.ts
-.gitignore
-```
-
-### Week 2 Files
-```
-prisma/schema.prisma
-prisma/seed.ts
-prisma/migrations/*
-scripts/backup-db.sh
-scripts/restore-db.sh
-scripts/reset-db.sh
-scripts/db-studio.sh
-src/app/api/seed-check/route.ts
-README.md
-```
-
-### Week 3 Files
-```
-src/auth.ts
-src/types/next-auth.d.ts
-src/types/dashboard.ts
-src/app/api/auth/[...nextauth]/route.ts
-src/app/auth/signin/page.tsx
-src/app/auth/signup/page.tsx
-src/app/auth/error/page.tsx
-src/app/dashboard/layout.tsx
-src/app/dashboard/page.tsx
-src/components/sign-out-button.tsx
-src/app/page.tsx (updated)
-prisma/schema.prisma (added password field)
-prisma/seed.ts (updated with passwords)
-```
-
----
-
-**Last Updated:** October 4, 2025
-**Next Review:** After Week 4 completion
+### Week 4 Files (NEW)
