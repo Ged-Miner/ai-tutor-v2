@@ -6,6 +6,19 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { updateUserSchema, type UpdateUserInput } from '@/lib/validations/user';
 import { useRouter } from 'next/navigation';
 import { Prisma } from '@prisma/client';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 interface User {
   id: string;
@@ -119,188 +132,130 @@ export default function EditUserModal({ isOpen, onClose, user }: EditUserModalPr
     onClose();
   };
 
-  if (!isOpen || !user) return null;
+  if (!user) return null;
 
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity"
-        onClick={handleClose}
-      />
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Edit User</DialogTitle>
+          <DialogDescription>{user.email}</DialogDescription>
+        </DialogHeader>
 
-      {/* Modal */}
-      <div className="fixed inset-0 z-50 overflow-y-auto">
-        <div className="flex min-h-full items-center justify-center p-4">
-          <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full">
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Edit User</h3>
-                <p className="text-sm text-gray-500 mt-1">{user.email}</p>
-              </div>
-              <button
-                onClick={handleClose}
-                className="text-gray-400 hover:text-gray-500 transition-colors"
-              >
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Error Alert */}
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-            {/* Form */}
-            <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
-              {/* Error Alert */}
-              {error && (
-                <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                  <div className="flex">
-                    <svg className="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div className="ml-3">
-                      <p className="text-sm text-red-800">{error}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Name Field */}
-              <div>
-                <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Full Name
-                </label>
-                <input
-                  {...register('name')}
-                  type="text"
-                  id="edit-name"
-                  className={`w-full text-gray-500 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.name ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="John Smith"
-                />
-                {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-                )}
-              </div>
-
-              {/* Email Field */}
-              <div>
-                <label htmlFor="edit-email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Email Address
-                </label>
-                <input
-                  {...register('email')}
-                  type="email"
-                  id="edit-email"
-                  className={`w-full text-gray-500 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.email ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="john@example.com"
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-                )}
-              </div>
-
-              {/* Password Field */}
-              <div>
-                <label htmlFor="edit-password" className="block text-sm font-medium text-gray-700 mb-1">
-                  New Password
-                </label>
-                <input
-                  {...register('password')}
-                  type="password"
-                  id="edit-password"
-                  className={`w-full text-gray-500 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.password ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="Leave blank to keep current password"
-                />
-                {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-                )}
-                <p className="mt-1 text-xs text-gray-500">
-                  Leave blank to keep the current password
-                </p>
-              </div>
-
-              {/* Role Field */}
-              <div>
-                <label htmlFor="edit-role" className="block text-sm font-medium text-gray-700 mb-1">
-                  Role
-                </label>
-                <select
-                  {...register('role')}
-                  id="edit-role"
-                  className={`w-full text-gray-500 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.role ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                >
-                  <option value="STUDENT">Student</option>
-                  <option value="TEACHER">Teacher</option>
-                  <option value="ADMIN">Admin</option>
-                </select>
-                {errors.role && (
-                  <p className="mt-1 text-sm text-red-600">{errors.role.message}</p>
-                )}
-              </div>
-
-              {/* Teacher Code Field (conditional) */}
-              {selectedRole === 'TEACHER' && (
-                <div>
-                  <label htmlFor="edit-teacherCode" className="block text-sm font-medium text-gray-700 mb-1">
-                    Teacher Code
-                  </label>
-                  <div className="flex space-x-2">
-                    <input
-                      {...register('teacherCode')}
-                      type="text"
-                      id="edit-teacherCode"
-                      className={`flex-1 text-gray-500 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.teacherCode ? 'border-red-300' : 'border-gray-300'
-                      }`}
-                      placeholder="TEACH001"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleGenerateCode}
-                      disabled={isGeneratingCode}
-                      className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium transition-colors disabled:opacity-50"
-                    >
-                      {isGeneratingCode ? 'Generating...' : 'Generate'}
-                    </button>
-                  </div>
-                  {errors.teacherCode && (
-                    <p className="mt-1 text-sm text-red-600">{errors.teacherCode.message}</p>
-                  )}
-                  <p className="mt-1 text-xs text-gray-500">
-                    Format: TEACH### (e.g., TEACH001)
-                  </p>
-                </div>
-              )}
-
-              {/* Footer Buttons */}
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? 'Saving...' : 'Save Changes'}
-                </button>
-              </div>
-            </form>
+          {/* Name Field */}
+          <div className="space-y-2">
+            <Label htmlFor="edit-name">Full Name</Label>
+            <Input
+              {...register('name')}
+              id="edit-name"
+              placeholder="John Smith"
+              className={errors.name ? 'border-destructive' : ''}
+            />
+            {errors.name && (
+              <p className="text-sm text-destructive">{errors.name.message}</p>
+            )}
           </div>
-        </div>
-      </div>
-    </>
+
+          {/* Email Field */}
+          <div className="space-y-2">
+            <Label htmlFor="edit-email">Email Address</Label>
+            <Input
+              {...register('email')}
+              type="email"
+              id="edit-email"
+              placeholder="john@example.com"
+              className={errors.email ? 'border-destructive' : ''}
+            />
+            {errors.email && (
+              <p className="text-sm text-destructive">{errors.email.message}</p>
+            )}
+          </div>
+
+          {/* Password Field */}
+          <div className="space-y-2">
+            <Label htmlFor="edit-password">New Password</Label>
+            <Input
+              {...register('password')}
+              type="password"
+              id="edit-password"
+              placeholder="Leave blank to keep current password"
+              className={errors.password ? 'border-destructive' : ''}
+            />
+            {errors.password && (
+              <p className="text-sm text-destructive">{errors.password.message}</p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Leave blank to keep the current password
+            </p>
+          </div>
+
+          {/* Role Field */}
+          <div className="space-y-2">
+            <Label htmlFor="edit-role">Role</Label>
+            <select
+              {...register('role')}
+              id="edit-role"
+              className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                errors.role ? 'border-destructive' : ''
+              }`}
+            >
+              <option value="STUDENT">Student</option>
+              <option value="TEACHER">Teacher</option>
+              <option value="ADMIN">Admin</option>
+            </select>
+            {errors.role && (
+              <p className="text-sm text-destructive">{errors.role.message}</p>
+            )}
+          </div>
+
+          {/* Teacher Code Field (conditional) */}
+          {selectedRole === 'TEACHER' && (
+            <div className="space-y-2">
+              <Label htmlFor="edit-teacherCode">Teacher Code</Label>
+              <div className="flex gap-2">
+                <Input
+                  {...register('teacherCode')}
+                  id="edit-teacherCode"
+                  placeholder="TEACH001"
+                  className={errors.teacherCode ? 'border-destructive' : ''}
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleGenerateCode}
+                  disabled={isGeneratingCode}
+                >
+                  {isGeneratingCode ? 'Generating...' : 'Generate'}
+                </Button>
+              </div>
+              {errors.teacherCode && (
+                <p className="text-sm text-destructive">{errors.teacherCode.message}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Format: TEACH### (e.g., TEACH001)
+              </p>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

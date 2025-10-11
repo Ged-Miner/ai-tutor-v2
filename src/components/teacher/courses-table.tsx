@@ -3,6 +3,16 @@
 import { useState } from 'react';
 import { EditCourseModal } from './edit-course-modal';
 import { DeleteCourseModal } from './delete-course-modal';
+import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Card } from '@/components/ui/card';
 
 interface Course {
   id: string;
@@ -25,73 +35,56 @@ export function CoursesTable({ courses }: CoursesTableProps) {
 
   return (
     <>
-      <div className="overflow-hidden rounded-lg bg-white shadow">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Course Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Description
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Lessons
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Students
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Created
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
+      <Card>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Course Name</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Lessons</TableHead>
+              <TableHead>Students</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {courses.map((course) => (
-              <tr key={course.id} className="hover:bg-gray-50">
-                <td className="whitespace-nowrap px-6 py-4">
-                  <div className="text-sm font-medium text-gray-900">
-                    {course.name}
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="text-sm text-gray-500 line-clamp-2">
+              <TableRow key={course.id}>
+                <TableCell className="font-medium">{course.name}</TableCell>
+                <TableCell className="max-w-md">
+                  <div className="line-clamp-2">
                     {course.description || (
-                      <span className="italic text-gray-400">No description</span>
+                      <span className="italic text-muted-foreground">No description</span>
                     )}
                   </div>
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                  {course._count.lessons}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                  {course._count.enrollments}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                </TableCell>
+                <TableCell>{course._count.lessons}</TableCell>
+                <TableCell>{course._count.enrollments}</TableCell>
+                <TableCell>
                   {new Date(course.createdAt).toLocaleDateString()}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                  <button
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setEditingCourse(course)}
-                    className="mr-4 text-blue-600 hover:text-blue-900"
+                    className="mr-2"
                   >
                     Edit
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setDeletingCourse(course)}
-                    className="text-red-600 hover:text-red-900"
                   >
                     Delete
-                  </button>
-                </td>
-              </tr>
+                  </Button>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </Card>
 
       {/* Modals */}
       {editingCourse && (

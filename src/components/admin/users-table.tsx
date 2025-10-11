@@ -3,6 +3,17 @@
 import { useState } from 'react';
 import EditUserModal from './edit-user-modal';
 import DeleteUserModal from './delete-user-modal';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Card } from '@/components/ui/card';
 
 interface User {
   id: string;
@@ -28,69 +39,71 @@ export default function UsersTable({ users }: UsersTableProps) {
 
   return (
     <>
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  User
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Role
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Teacher Code
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Activity
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Joined
-                </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {users.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
-                        <span className="text-white font-semibold text-sm">
+      <Card>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>User</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Teacher Code</TableHead>
+              <TableHead>Activity</TableHead>
+              <TableHead>Joined</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {users.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="h-24 text-center">
+                  <div className="flex flex-col items-center justify-center py-8">
+                    <svg className="h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <h3 className="mt-2 text-sm font-medium">No users</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">Get started by creating a new user.</p>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              users.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600">
+                        <span className="text-sm font-semibold text-white">
                           {user.name?.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase()}
                         </span>
                       </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                        <div className="text-sm text-gray-500">{user.email}</div>
+                      <div>
+                        <div className="font-medium">{user.name}</div>
+                        <div className="text-sm text-muted-foreground">{user.email}</div>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      user.role === 'ADMIN'
-                        ? 'bg-purple-100 text-purple-800'
-                        : user.role === 'TEACHER'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        user.role === 'ADMIN'
+                          ? 'default'
+                          : user.role === 'TEACHER'
+                          ? 'secondary'
+                          : 'outline'
+                      }
+                    >
                       {user.role}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
                     {user.teacherCode ? (
-                      <code className="bg-gray-100 px-2 py-1 rounded text-xs font-mono">
+                      <code className="rounded bg-muted px-2 py-1 text-xs font-mono">
                         {user.teacherCode}
                       </code>
                     ) : (
-                      <span className="text-gray-400">—</span>
+                      <span className="text-muted-foreground">—</span>
                     )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div className="flex space-x-4">
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-3 text-sm">
                       {user._count.courses > 0 && (
                         <span title="Courses">📚 {user._count.courses}</span>
                       )}
@@ -101,48 +114,40 @@ export default function UsersTable({ users }: UsersTableProps) {
                         <span title="Chat Sessions">💬 {user._count.chatSessions}</span>
                       )}
                       {user._count.courses === 0 && user._count.enrollments === 0 && user._count.chatSessions === 0 && (
-                        <span className="text-gray-400">No activity</span>
+                        <span className="text-muted-foreground">No activity</span>
                       )}
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  </TableCell>
+                  <TableCell>
                     {new Date(user.createdAt).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'short',
                       day: 'numeric'
                     })}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => setEditingUser(user)}
-                      className="text-blue-600 hover:text-blue-900 mr-4 transition-colors"
+                      className="mr-2"
                     >
                       Edit
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => setDeletingUser(user)}
-                      className="text-red-600 hover:text-red-900 transition-colors"
                     >
                       Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Empty State */}
-        {users.length === 0 && (
-          <div className="text-center py-12">
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No users</h3>
-            <p className="mt-1 text-sm text-gray-500">Get started by creating a new user.</p>
-          </div>
-        )}
-      </div>
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </Card>
 
       {/* Edit Modal */}
       <EditUserModal
