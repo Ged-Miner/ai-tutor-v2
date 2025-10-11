@@ -5,12 +5,12 @@ import { updateCourseSchema } from '@/lib/validations/course';
 import { Prisma } from '@prisma/client';
 
 /**
- * GET /api/teacher/courses/[id]
+ * GET /api/teacher/courses/[courseId]
  * Fetch a single course by ID
  */
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ courseId: string }> }
 ) {
   try {
     const session = await auth();
@@ -22,13 +22,12 @@ export async function GET(
       );
     }
 
-    const { id } = await params;
+    const { courseId } = await params;
 
-    // Fetch course with ownership check
     const course = await prisma.course.findFirst({
       where: {
-        id,
-        teacherId: session.user.id, // Ensure teacher owns this course
+        id: courseId,
+        teacherId: session.user.id,
       },
       include: {
         _count: {
@@ -58,12 +57,12 @@ export async function GET(
 }
 
 /**
- * PUT /api/teacher/courses/[id]
+ * PUT /api/teacher/courses/[courseId]
  * Update a course
  */
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ courseId: string }> }
 ) {
   try {
     const session = await auth();
@@ -75,11 +74,11 @@ export async function PUT(
       );
     }
 
-    const { id } = await params;
+    const { courseId } = await params;
 
     const existingCourse = await prisma.course.findFirst({
       where: {
-        id,
+        id: courseId,
         teacherId: session.user.id,
       },
     });
@@ -104,8 +103,7 @@ export async function PUT(
       );
     }
 
-    // Build update data with proper JSON handling
-    const updateData: Prisma.CourseUpdateInput = {}; // CHANGED: Use Prisma type
+    const updateData: Prisma.CourseUpdateInput = {};
 
     if (validationResult.data.name !== undefined) {
       updateData.name = validationResult.data.name;
@@ -116,14 +114,13 @@ export async function PUT(
     }
 
     if (validationResult.data.settings !== undefined) {
-      // FIXED: Proper JSON handling
       updateData.settings = validationResult.data.settings
         ? validationResult.data.settings
         : Prisma.JsonNull;
     }
 
     const updatedCourse = await prisma.course.update({
-      where: { id },
+      where: { id: courseId },
       data: updateData,
       include: {
         _count: {
@@ -146,12 +143,12 @@ export async function PUT(
 }
 
 /**
- * DELETE /api/teacher/courses/[id]
+ * DELETE /api/teacher/courses/[courseId]
  * Delete a course (cascade deletes lessons, enrollments, chat sessions)
  */
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ courseId: string }> }
 ) {
   try {
     const session = await auth();
@@ -163,12 +160,11 @@ export async function DELETE(
       );
     }
 
-    const { id } = await params;
+    const { courseId } = await params;
 
-    // Get course with counts for confirmation
     const course = await prisma.course.findFirst({
       where: {
-        id,
+        id: courseId,
         teacherId: session.user.id,
       },
       include: {
@@ -188,9 +184,8 @@ export async function DELETE(
       );
     }
 
-    // Delete course (cascade will handle lessons, enrollments, chat sessions)
     await prisma.course.delete({
-      where: { id },
+      where: { id: courseId },
     });
 
     return NextResponse.json({

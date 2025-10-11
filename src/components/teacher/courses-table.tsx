@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link'; // ADD THIS
 import { EditCourseModal } from './edit-course-modal';
 import { DeleteCourseModal } from './delete-course-modal';
 import { Button } from '@/components/ui/button';
@@ -54,7 +55,9 @@ export function CoursesTable({ courses }: CoursesTableProps) {
                 <TableCell className="max-w-md">
                   <div className="line-clamp-2">
                     {course.description || (
-                      <span className="italic text-muted-foreground">No description</span>
+                      <span className="italic text-muted-foreground">
+                        No description
+                      </span>
                     )}
                   </div>
                 </TableCell>
@@ -64,6 +67,12 @@ export function CoursesTable({ courses }: CoursesTableProps) {
                   {new Date(course.createdAt).toLocaleDateString()}
                 </TableCell>
                 <TableCell className="text-right">
+                  {/* ADD THIS LINK + BUTTON */}
+                  <Link href={`/teacher/courses/${course.id}/lessons`}>
+                    <Button variant="ghost" size="sm" className="mr-2">
+                      View Lessons
+                    </Button>
+                  </Link>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -76,6 +85,7 @@ export function CoursesTable({ courses }: CoursesTableProps) {
                     variant="ghost"
                     size="sm"
                     onClick={() => setDeletingCourse(course)}
+                    className="text-red-600 hover:text-red-700"
                   >
                     Delete
                   </Button>
