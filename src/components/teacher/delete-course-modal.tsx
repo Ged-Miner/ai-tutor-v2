@@ -2,6 +2,18 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, AlertTriangle } from 'lucide-react';
 
 interface DeleteCourseModalProps {
   course: {
@@ -52,83 +64,94 @@ export function DeleteCourseModal({ course, onClose }: DeleteCourseModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-        <h2 className="mb-4 text-xl font-bold text-red-600">
-          ⚠️ Delete Course - This Cannot Be Undone
-        </h2>
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <div className="flex items-center gap-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+            </div>
+            <div>
+              <DialogTitle className="text-destructive">
+                Delete Course - This Cannot Be Undone
+              </DialogTitle>
+            </div>
+          </div>
+        </DialogHeader>
 
-        <div className="mb-4 space-y-2">
-          <p className="text-sm text-gray-700">
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
             You are about to <strong>permanently delete</strong> this course:
           </p>
-          <div className="rounded-md bg-gray-50 p-3">
+
+          <div className="rounded-lg border bg-muted/50 p-3">
             <p className="font-semibold">{course.name}</p>
           </div>
 
           {hasRelatedData && (
-            <div className="rounded-md border-2 border-red-300 bg-red-50 p-4">
-              <p className="mb-2 font-bold text-red-800">
-                🔥 This will also permanently delete:
-              </p>
-              <ul className="space-y-1 text-sm text-red-700">
-                {course._count.lessons > 0 && (
-                  <li>
-                    • <strong>{course._count.lessons}</strong> lesson(s) and
-                    all their content
-                  </li>
-                )}
-                {course._count.enrollments > 0 && (
-                  <li>
-                    • <strong>{course._count.enrollments}</strong> student
-                    enrollment(s)
-                  </li>
-                )}
-              </ul>
-              <p className="mt-2 text-xs font-semibold text-red-900">
-                All chat sessions for this course will be lost!
-              </p>
-            </div>
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <div className="font-medium mb-2">
+                  This will also permanently delete:
+                </div>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  {course._count.lessons > 0 && (
+                    <li>
+                      <strong>{course._count.lessons}</strong> lesson(s) and all their content
+                    </li>
+                  )}
+                  {course._count.enrollments > 0 && (
+                    <li>
+                      <strong>{course._count.enrollments}</strong> student enrollment(s)
+                    </li>
+                  )}
+                </ul>
+                <p className="mt-2 text-xs font-semibold">
+                  All chat sessions for this course will be lost!
+                </p>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="confirm-name">
+              Type <code className="rounded bg-muted px-1 text-sm">{course.name}</code> to confirm:
+            </Label>
+            <Input
+              id="confirm-name"
+              type="text"
+              value={confirmName}
+              onChange={(e) => {
+                setConfirmName(e.target.value);
+                setError('');
+              }}
+              placeholder="Type course name to confirm"
+              className={error ? 'border-destructive' : ''}
+            />
+          </div>
+
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           )}
         </div>
 
-        <div className="mb-4">
-          <label className="mb-2 block text-sm font-medium text-gray-700">
-            Type{' '}
-            <code className="rounded bg-gray-100 px-1">{course.name}</code> to
-            confirm:
-          </label>
-          <input
-            type="text"
-            value={confirmName}
-            onChange={(e) => {
-              setConfirmName(e.target.value);
-              setError('');
-            }}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
-            placeholder="Type course name to confirm"
-          />
-        </div>
-
-        {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
-
-        <div className="flex gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            disabled={isDeleting}
-          >
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={isDeleting}>
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="destructive"
             onClick={handleDelete}
             disabled={isDeleting || confirmName !== course.name}
-            className="flex-1 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-gray-300"
           >
             {isDeleting ? 'Deleting...' : 'Permanently Delete'}
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
