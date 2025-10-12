@@ -23,3 +23,28 @@ export interface ApiError {
   error: string;
   details?: unknown;
 }
+
+/**
+ * Teacher information
+ */
+export interface TeacherInfo {
+  id: string;
+  name: string | null;
+  email: string;
+}
+
+/**
+ * Student's enrolled course with additional metadata
+ */
+export interface StudentCourse {
+  id: string;
+  name: string;
+  description: string | null;
+  createdAt: Date;
+  enrolledAt: Date;
+  teacher: TeacherInfo;
+  _count: {
+    lessons: number;
+    enrollments: number;
+  };
+}
