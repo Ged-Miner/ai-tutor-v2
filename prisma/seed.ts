@@ -7,7 +7,8 @@ async function main() {
   console.log('🌱 Starting database seed...');
 
   // Clear existing data (in development only!)
-  console.log('🗑️  Clearing existing data...');
+  console.log('🗑️  Clearing existing data...')
+  await prisma.message.deleteMany();
   await prisma.chatSession.deleteMany();
   await prisma.enrollment.deleteMany();
   await prisma.lesson.deleteMany();
@@ -349,35 +350,99 @@ Output a complete, well-structured Markdown document that students can use for r
     },
   });
 
-  // Create sample chat sessions
-  console.log('💬 Creating sample chat sessions...');
-  await prisma.chatSession.create({
+  // Create sample chat sessions with messages
+  console.log('💬 Creating sample chat sessions with messages...');
+
+  // Chat session 1: Alice asking about lesson 1 (Introduction to Programming)
+  const chatSession1 = await prisma.chatSession.create({
     data: {
       lessonId: lesson1.id,
       studentId: students[0].id,
-      messages: [
-        {
-          role: 'user',
-          content: 'Can you explain what a variable is in simpler terms?',
-          timestamp: new Date().toISOString(),
-        },
-        {
-          role: 'assistant',
-          content: 'Think of a variable like a labeled box. The label is the variable name, and inside the box you put data (like a number or text). Whenever you need that data, you just refer to the box by its label. For example, if you have a box labeled "age" with the number 25 inside, you can use "age" throughout your program and it will always refer to that value of 25.',
-          timestamp: new Date().toISOString(),
-        },
-        {
-          role: 'user',
-          content: 'What\'s the difference between an integer and a float?',
-          timestamp: new Date().toISOString(),
-        },
-        {
-          role: 'assistant',
-          content: 'Great question! An integer is a whole number without any decimal point - like 5, 100, or -7. A float (short for "floating point") is a number that can have decimal places - like 3.14, -0.5, or 2.0. Even though 2.0 looks whole, it\'s still a float because of the decimal point. Use integers for counting things (like 3 apples) and floats for measurements that need precision (like 3.75 inches).',
-          timestamp: new Date().toISOString(),
-        },
-      ],
     },
+  });
+
+  // Chat session 2: Bob asking about lesson 1
+  const chatSession2 = await prisma.chatSession.create({
+    data: {
+      lessonId: lesson1.id,
+      studentId: students[1].id,
+    },
+  });
+
+  // Chat session 3: Alice asking about lesson 3 (HTML)
+  const chatSession3 = await prisma.chatSession.create({
+    data: {
+      lessonId: lesson3.id,
+      studentId: students[0].id,
+    },
+  });
+
+  // Create messages for chat session 1 (Alice's conversation about variables)
+  await prisma.message.createMany({
+    data: [
+      {
+        chatSessionId: chatSession1.id,
+        content: 'Can you explain what a variable is in simpler terms?',
+        role: 'USER',
+      },
+      {
+        chatSessionId: chatSession1.id,
+        content: 'Think of a variable like a labeled box. The label is the variable name, and inside the box you put data (like a number or text). Whenever you need that data, you just refer to the box by its label. For example, if you have a box labeled "age" with the number 25 inside, you can use "age" throughout your program and it will always refer to that value of 25.',
+        role: 'ASSISTANT',
+      },
+      {
+        chatSessionId: chatSession1.id,
+        content: "What's the difference between an integer and a float?",
+        role: 'USER',
+      },
+      {
+        chatSessionId: chatSession1.id,
+        content: 'Great question! An integer is a whole number without any decimal point - like 5, 100, or -7. A float (short for "floating point") is a number that can have decimal places - like 3.14, -0.5, or 2.0. Even though 2.0 looks whole, it\'s still a float because of the decimal point. Use integers for counting things (like 3 apples) and floats for measurements that need precision (like 3.75 inches).',
+        role: 'ASSISTANT',
+      },
+    ],
+  });
+
+  // Create messages for chat session 2 (Bob's conversation)
+  await prisma.message.createMany({
+    data: [
+      {
+        chatSessionId: chatSession2.id,
+        content: 'I\'m confused about strings. Do they always need double quotes?',
+        role: 'USER',
+      },
+      {
+        chatSessionId: chatSession2.id,
+        content: 'Good question! In Python, you can use either single quotes (\') or double quotes (") for strings - they work the same way. For example, both "Hello" and \'Hello\' are valid strings. The main reason we have both is for convenience when your string contains quotes. If your string has a single quote in it (like "It\'s sunny"), using double quotes makes it easier!',
+        role: 'ASSISTANT',
+      },
+    ],
+  });
+
+  // Create messages for chat session 3 (Alice learning HTML)
+  await prisma.message.createMany({
+    data: [
+      {
+        chatSessionId: chatSession3.id,
+        content: 'Do all HTML tags need closing tags?',
+        role: 'USER',
+      },
+      {
+        chatSessionId: chatSession3.id,
+        content: 'Great question! Most HTML tags need closing tags, but there are some exceptions called "self-closing" or "void" tags. These include <img>, <br>, <hr>, <input>, and a few others. These tags don\'t need closing tags because they don\'t contain content between opening and closing tags. For example: <img src="photo.jpg"> is complete without </img>.',
+        role: 'ASSISTANT',
+      },
+      {
+        chatSessionId: chatSession3.id,
+        content: 'What\'s the difference between <div> and <span>?',
+        role: 'USER',
+      },
+      {
+        chatSessionId: chatSession3.id,
+        content: 'Excellent question! The main difference is how they display:\n\n- <div> is a **block-level** element - it takes up the full width available and starts on a new line. Think of it like a paragraph break.\n- <span> is an **inline** element - it only takes up as much width as needed and stays in the same line.\n\nUse <div> for larger sections and layout structure. Use <span> when you want to style just part of a line of text.',
+        role: 'ASSISTANT',
+      },
+    ],
   });
 
   console.log('✅ Seed completed successfully!');
@@ -389,7 +454,9 @@ Output a complete, well-structured Markdown document that students can use for r
   console.log(`- Lessons: 3`);
   console.log(`- Enrollments: 6`);
   console.log(`- System Prompts: 2`);
-  console.log(`- Chat Sessions: 1`);
+  console.log(`- Chat Sessions: 3`);
+  console.log(`- Messages: 10`);
+
 }
 
 main()
