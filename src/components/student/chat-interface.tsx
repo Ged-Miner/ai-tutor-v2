@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
+import { useChatSocket } from '@/hooks/useChatSocket';
 
 interface Message {
   id: string;
@@ -21,11 +22,33 @@ export function ChatInterface({ lessonId, initialMessages = [] }: ChatInterfaceP
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Handle incoming messages from Socket.io
+  const handleMessageReceived = useCallback((message: Message) => {
+    setMessages(prev => {
+      // Avoid duplicates by checking if message already exists
+      const exists = prev.some(m => m.id === message.id);
+      if (exists) return prev;
+      return [...prev, message];
+    });
+    setIsLoading(false);
+  }, []);
+
+  const { sendMessage, isConnected, error } = useChatSocket({
+    lessonId,
+    onMessageReceived: handleMessageReceived,
+  });
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || !isConnected) return;
 
     const userMessage = input.trim();
     setInput('');
@@ -41,22 +64,31 @@ export function ChatInterface({ lessonId, initialMessages = [] }: ChatInterfaceP
 
     setMessages(prev => [...prev, newUserMessage]);
 
-    // TODO: Send to Socket.io (will implement in next steps)
-    // For now, just simulate a delay
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: `temp-${Date.now()}-assistant`,
-        content: 'This is a placeholder response. We\'ll connect to the AI in the next steps!',
-        role: 'ASSISTANT',
-        createdAt: new Date(),
-      };
-      setMessages(prev => [...prev, assistantMessage]);
+    // Send message via Socket.io
+    const sent = sendMessage(userMessage, 'USER');
+
+    if (!sent) {
+      // If sending failed, remove the optimistic message and show error
+      setMessages(prev => prev.filter(m => m.id !== newUserMessage.id));
       setIsLoading(false);
-    }, 1000);
+      alert('Failed to send message. Please check your connection.');
+    }
   };
 
   return (
     <div className="flex flex-col h-full">
+      {/* Connection Status Bar */}
+      {!isConnected && (
+        <div className="bg-yellow-100 dark:bg-yellow-900 text-yellow-900 dark:text-yellow-100 px-4 py-2 text-sm">
+          ⚠️ Disconnected - trying to reconnect...
+        </div>
+      )}
+      {error && (
+        <div className="bg-red-100 dark:bg-red-900 text-red-900 dark:text-red-100 px-4 py-2 text-sm">
+          ❌ Error: {error}
+        </div>
+      )}
+
       {/* Chat Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 ? (
@@ -65,25 +97,28 @@ export function ChatInterface({ lessonId, initialMessages = [] }: ChatInterfaceP
             <p className="text-sm">Ask questions about this lesson and I&apos;ll help you understand the material.</p>
           </div>
         ) : (
-          messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.role === 'USER' ? 'justify-end' : 'justify-start'}`}
-            >
-              <Card
-                className={`max-w-[80%] p-3 ${
-                  message.role === 'USER'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted'
-                }`}
+          <>
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${message.role === 'USER' ? 'justify-end' : 'justify-start'}`}
               >
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                <p className="text-xs opacity-70 mt-1">
-                  {new Date(message.createdAt).toLocaleTimeString()}
-                </p>
-              </Card>
-            </div>
-          ))
+                <Card
+                  className={`max-w-[80%] p-3 ${
+                    message.role === 'USER'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted'
+                  }`}
+                >
+                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <p className="text-xs opacity-70 mt-1">
+                    {new Date(message.createdAt).toLocaleTimeString()}
+                  </p>
+                </Card>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </>
         )}
 
         {isLoading && (
@@ -109,11 +144,11 @@ export function ChatInterface({ lessonId, initialMessages = [] }: ChatInterfaceP
             }}
             placeholder="Ask a question about this lesson..."
             className="min-h-[60px] max-h-[200px] resize-none"
-            disabled={isLoading}
+            disabled={isLoading || !isConnected}
           />
           <Button
             type="submit"
-            disabled={!input.trim() || isLoading}
+            disabled={!input.trim() || isLoading || !isConnected}
             className="self-end"
           >
             Send
