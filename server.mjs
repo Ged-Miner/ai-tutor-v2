@@ -2,7 +2,9 @@ import { createServer } from 'http';
 import { parse } from 'url';
 import next from 'next';
 import { Server } from 'socket.io';
+import { PrismaClient } from '@prisma/client';
 
+const prisma = new PrismaClient();
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = 'localhost';
 const port = parseInt(process.env.PORT || '3000', 10);
@@ -54,13 +56,52 @@ app.prepare().then(() => {
     socket.on('send_message', async (data) => {
       console.log('💬 Message received:', data);
 
-      // Echo message back to the room (temporary - will save to DB later)
-      io.to(`lesson:${data.lessonId}`).emit('receive_message', {
-        id: `temp-${Date.now()}`,
-        content: data.content,
-        role: data.role,
-        createdAt: new Date().toISOString(),
-      });
+      try {
+        const { lessonId, content, role, studentId } = data;
+
+        // Find or create chat session
+        let chatSession = await prisma.chatSession.findUnique({
+          where: {
+            lessonId_studentId: {
+              lessonId,
+              studentId,
+            },
+          },
+        });
+
+        if (!chatSession) {
+          chatSession = await prisma.chatSession.create({
+            data: {
+              lessonId,
+              studentId,
+            },
+          });
+        }
+
+        // Save message to database
+        const message = await prisma.message.create({
+          data: {
+            chatSessionId: chatSession.id,
+            content,
+            role,
+          },
+        });
+
+        console.log('✅ Message saved to database:', message.id);
+
+        // Broadcast message to everyone in the lesson room
+        io.to(`lesson:${lessonId}`).emit('receive_message', {
+          id: message.id,
+          content: message.content,
+          role: message.role,
+          createdAt: message.createdAt.toISOString(),
+        });
+      } catch (error) {
+        console.error('❌ Error saving message:', error);
+        socket.emit('message_error', {
+          error: 'Failed to save message',
+        });
+      }
     });
 
     // TEST: Handle test messages
@@ -84,5 +125,23 @@ app.prepare().then(() => {
    - Network:  http://${hostname}:${port}
    - Socket.io path: /socket.io/
     `);
+  });
+
+  // Start server
+  httpServer.listen(port, (err) => {
+    if (err) throw err;
+    console.log(`
+🚀 Server ready!
+   - Local:    http://localhost:${port}
+   - Network:  http://${hostname}:${port}
+   - Socket.io path: /socket.io/
+    `);
+  });
+
+  // Graceful shutdown
+  process.on('SIGTERM', async () => {
+    console.log('SIGTERM received, closing server...');
+    await prisma.$disconnect();
+    process.exit(0);
   });
 });

@@ -128,6 +128,7 @@ export default async function StudentLessonPage({ params }: PageProps) {
           <div className="flex-1 overflow-hidden">
             <ChatInterface
               lessonId={lesson.id}
+              studentId={session.user.id}  // ADD THIS LINE
               initialMessages={chatSession.messages}
             />
           </div>
