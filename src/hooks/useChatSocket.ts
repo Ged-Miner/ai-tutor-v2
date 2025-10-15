@@ -12,10 +12,11 @@ interface Message {
 
 interface UseChatSocketProps {
   lessonId: string;
+  studentId: string;
   onMessageReceived: (message: Message) => void;
 }
 
-export function useChatSocket({ lessonId, onMessageReceived }: UseChatSocketProps) {
+export function useChatSocket({ lessonId, studentId, onMessageReceived }: UseChatSocketProps) {
   const { socket, isConnected, error } = useSocket();
 
   // Join the lesson room when connected
@@ -58,15 +59,16 @@ export function useChatSocket({ lessonId, onMessageReceived }: UseChatSocketProp
       return false;
     }
 
-    console.log('📤 Sending message:', { lessonId, content, role });
+    console.log('📤 Sending message:', { lessonId, studentId, content, role });
     socket.emit('send_message', {
       lessonId,
+      studentId,
       content,
       role,
     });
 
     return true;
-  }, [socket, isConnected, lessonId]);
+  }, [socket, isConnected, lessonId, studentId]);
 
   return {
     sendMessage,

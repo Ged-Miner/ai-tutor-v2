@@ -15,10 +15,11 @@ interface Message {
 
 interface ChatInterfaceProps {
   lessonId: string;
+  studentId: string;
   initialMessages?: Message[];
 }
 
-export function ChatInterface({ lessonId, initialMessages = [] }: ChatInterfaceProps) {
+export function ChatInterface({ lessonId, studentId, initialMessages = [] }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -36,7 +37,7 @@ export function ChatInterface({ lessonId, initialMessages = [] }: ChatInterfaceP
   }, []);
 
   const { sendMessage, isConnected, error } = useChatSocket({
-    lessonId,
+    lessonId, studentId,
     onMessageReceived: handleMessageReceived,
   });
 
