@@ -55,25 +55,17 @@ export function ChatInterface({ lessonId, studentId, initialMessages = [] }: Cha
     setInput('');
     setIsLoading(true);
 
-    // Add user message to UI immediately
-    const newUserMessage: Message = {
-      id: `temp-${Date.now()}`,
-      content: userMessage,
-      role: 'USER',
-      createdAt: new Date(),
-    };
-
-    setMessages(prev => [...prev, newUserMessage]);
-
-    // Send message via Socket.io
+    // Send message via Socket.io (don't add optimistically)
     const sent = sendMessage(userMessage, 'USER');
 
     if (!sent) {
-      // If sending failed, remove the optimistic message and show error
-      setMessages(prev => prev.filter(m => m.id !== newUserMessage.id));
+      // If sending failed, re-enable input and show error
+      setInput(userMessage); // Restore the message
       setIsLoading(false);
       alert('Failed to send message. Please check your connection.');
     }
+
+    // Note: Message will appear when server broadcasts it back via 'receive_message'
   };
 
   return (

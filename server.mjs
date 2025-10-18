@@ -67,6 +67,14 @@ app.prepare().then(() => {
               studentId,
             },
           },
+          include: {
+            messages: {
+              orderBy: {
+                createdAt: 'asc',
+              },
+              take: 20, // Include last 20 messages for context
+            },
+          },
         });
 
         if (!chatSession) {
@@ -75,11 +83,14 @@ app.prepare().then(() => {
               lessonId,
               studentId,
             },
+            include: {
+              messages: true,
+            },
           });
         }
 
-        // Save message to database
-        const message = await prisma.message.create({
+        // Save user message to database
+        const userMessage = await prisma.message.create({
           data: {
             chatSessionId: chatSession.id,
             content,
@@ -87,19 +98,69 @@ app.prepare().then(() => {
           },
         });
 
-        console.log('✅ Message saved to database:', message.id);
+        console.log('✅ User message saved to database:', userMessage.id);
 
-        // Broadcast message to everyone in the lesson room
+        // Broadcast user message to everyone in the lesson room
         io.to(`lesson:${lessonId}`).emit('receive_message', {
-          id: message.id,
-          content: message.content,
-          role: message.role,
-          createdAt: message.createdAt.toISOString(),
+          id: userMessage.id,
+          content: userMessage.content,
+          role: userMessage.role,
+          createdAt: userMessage.createdAt.toISOString(),
         });
+
+        // Generate AI response for USER messages
+        if (role === 'USER') {
+          console.log('🤖 Generating AI response...');
+
+          // Build conversation history for context
+          const conversationHistory = chatSession.messages.map(msg => ({
+            role: msg.role === 'USER' ? 'user' : 'assistant',
+            content: msg.content,
+          }));
+
+          // Call API route to generate AI response
+          const apiUrl = `http://localhost:${port}/api/chat/generate-response`;
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              lessonId,
+              conversationHistory,
+              userMessage: content,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`API returned ${response.status}`);
+          }
+
+          const { response: aiResponseContent } = await response.json();
+
+          // Save AI response to database
+          const aiMessage = await prisma.message.create({
+            data: {
+              chatSessionId: chatSession.id,
+              content: aiResponseContent,
+              role: 'ASSISTANT',
+            },
+          });
+
+          console.log('✅ AI response saved to database:', aiMessage.id);
+
+          // Broadcast AI response to everyone in the lesson room
+          io.to(`lesson:${lessonId}`).emit('receive_message', {
+            id: aiMessage.id,
+            content: aiMessage.content,
+            role: aiMessage.role,
+            createdAt: aiMessage.createdAt.toISOString(),
+          });
+        }
       } catch (error) {
-        console.error('❌ Error saving message:', error);
+        console.error('❌ Error handling message:', error);
         socket.emit('message_error', {
-          error: 'Failed to save message',
+          error: 'Failed to process message',
         });
       }
     });
@@ -114,17 +175,6 @@ app.prepare().then(() => {
     socket.on('disconnect', () => {
       console.log('❌ Client disconnected:', socket.id);
     });
-  });
-
-  // Start server
-  httpServer.listen(port, (err) => {
-    if (err) throw err;
-    console.log(`
-🚀 Server ready!
-   - Local:    http://localhost:${port}
-   - Network:  http://${hostname}:${port}
-   - Socket.io path: /socket.io/
-    `);
   });
 
   // Start server
