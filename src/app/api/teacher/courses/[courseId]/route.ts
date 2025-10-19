@@ -7,6 +7,7 @@ import { Prisma } from '@prisma/client';
 /**
  * GET /api/teacher/courses/[courseId]
  * Fetch a single course by ID
+ * Teachers can only see their own courses, admins can see any course
  */
 export async function GET(
   request: Request,
@@ -15,21 +16,30 @@ export async function GET(
   try {
     const session = await auth();
 
-    if (!session?.user || session.user.role !== 'TEACHER') {
+    if (!session?.user || (session.user.role !== 'TEACHER' && session.user.role !== 'ADMIN')) {
       return NextResponse.json(
-        { error: 'Unauthorized - Teacher access required' },
+        { error: 'Unauthorized - Teacher or Admin access required' },
         { status: 401 }
       );
     }
 
     const { courseId } = await params;
 
+    // Build query based on role
+    const whereClause = session.user.role === 'ADMIN'
+      ? { id: courseId } // Admin can see any course
+      : { id: courseId, teacherId: session.user.id }; // Teacher sees only their own
+
     const course = await prisma.course.findFirst({
-      where: {
-        id: courseId,
-        teacherId: session.user.id,
-      },
+      where: whereClause,
       include: {
+        teacher: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
         _count: {
           select: {
             lessons: true,
@@ -59,6 +69,7 @@ export async function GET(
 /**
  * PUT /api/teacher/courses/[courseId]
  * Update a course
+ * Teachers can only update their own courses, admins can update any course
  */
 export async function PUT(
   request: Request,
@@ -67,20 +78,22 @@ export async function PUT(
   try {
     const session = await auth();
 
-    if (!session?.user || session.user.role !== 'TEACHER') {
+    if (!session?.user || (session.user.role !== 'TEACHER' && session.user.role !== 'ADMIN')) {
       return NextResponse.json(
-        { error: 'Unauthorized - Teacher access required' },
+        { error: 'Unauthorized - Teacher or Admin access required' },
         { status: 401 }
       );
     }
 
     const { courseId } = await params;
 
+    // Build query based on role
+    const whereClause = session.user.role === 'ADMIN'
+      ? { id: courseId } // Admin can update any course
+      : { id: courseId, teacherId: session.user.id }; // Teacher updates only their own
+
     const existingCourse = await prisma.course.findFirst({
-      where: {
-        id: courseId,
-        teacherId: session.user.id,
-      },
+      where: whereClause,
     });
 
     if (!existingCourse) {
@@ -119,10 +132,36 @@ export async function PUT(
         : Prisma.JsonNull;
     }
 
+    // Allow admin to reassign course to different teacher
+    if (validationResult.data.teacherId !== undefined && session.user.role === 'ADMIN') {
+      // Verify the new teacher exists and has TEACHER role
+      const teacher = await prisma.user.findUnique({
+        where: { id: validationResult.data.teacherId },
+      });
+
+      if (!teacher || teacher.role !== 'TEACHER') {
+        return NextResponse.json(
+          { error: 'Invalid teacherId - user must exist and have TEACHER role' },
+          { status: 400 }
+        );
+      }
+
+      updateData.teacher = {
+        connect: { id: validationResult.data.teacherId },
+      };
+    }
+
     const updatedCourse = await prisma.course.update({
       where: { id: courseId },
       data: updateData,
       include: {
+        teacher: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
         _count: {
           select: {
             lessons: true,
@@ -145,6 +184,7 @@ export async function PUT(
 /**
  * DELETE /api/teacher/courses/[courseId]
  * Delete a course (cascade deletes lessons, enrollments, chat sessions)
+ * Teachers can only delete their own courses, admins can delete any course
  */
 export async function DELETE(
   request: Request,
@@ -153,20 +193,22 @@ export async function DELETE(
   try {
     const session = await auth();
 
-    if (!session?.user || session.user.role !== 'TEACHER') {
+    if (!session?.user || (session.user.role !== 'TEACHER' && session.user.role !== 'ADMIN')) {
       return NextResponse.json(
-        { error: 'Unauthorized - Teacher access required' },
+        { error: 'Unauthorized - Teacher or Admin access required' },
         { status: 401 }
       );
     }
 
     const { courseId } = await params;
 
+    // Build query based on role
+    const whereClause = session.user.role === 'ADMIN'
+      ? { id: courseId } // Admin can delete any course
+      : { id: courseId, teacherId: session.user.id }; // Teacher deletes only their own
+
     const course = await prisma.course.findFirst({
-      where: {
-        id: courseId,
-        teacherId: session.user.id,
-      },
+      where: whereClause,
       include: {
         _count: {
           select: {

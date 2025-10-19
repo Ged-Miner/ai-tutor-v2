@@ -20,6 +20,9 @@ export const createCourseSchema = z.object({
       // maxStudents: z.number().optional(),
     })
     .optional(),
+  teacherId: z
+    .string()
+    .optional(), // Required for admin, auto-filled for teacher
 });
 
 /**
@@ -42,6 +45,9 @@ export const updateCourseSchema = z.object({
       // Future settings
     })
     .optional(),
+  teacherId: z
+    .string()
+    .optional(), // Allow admin to reassign course to different teacher
 });
 
 // TypeScript types inferred from schemas

@@ -7,6 +7,8 @@ import { createUserSchema } from '@/lib/validations/user';
 /**
  * GET /api/admin/users
  * Fetch all users (admin only)
+ * Query params:
+ *   - role: Filter by user role (ADMIN, TEACHER, STUDENT)
  */
 export async function GET(request: NextRequest) {
   try {
@@ -27,8 +29,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch all users with related data counts
+    // Extract query parameters
+    const { searchParams } = new URL(request.url);
+    const roleParam = searchParams.get('role');
+
+    // Build where clause for filtering
+    const whereClause: { role?: 'ADMIN' | 'TEACHER' | 'STUDENT' } = {};
+    if (roleParam && ['ADMIN', 'TEACHER', 'STUDENT'].includes(roleParam)) {
+      whereClause.role = roleParam as 'ADMIN' | 'TEACHER' | 'STUDENT';
+    }
+
+    // Fetch users with optional role filter
     const users = await prisma.user.findMany({
+      where: whereClause,
       select: {
         id: true,
         email: true,
