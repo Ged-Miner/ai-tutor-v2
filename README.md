@@ -325,3 +325,173 @@ docker compose restart
 - [NextAuth.js Documentation](https://next-auth.js.org/)
 - [Docker Documentation](https://docs.docker.com/)
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+
+```
+ai-tutor-v2
+├─ .next
+├─ README.md
+├─ backup
+├─ components.json
+├─ docker
+├─ docker-compose.yml
+├─ eslint.config.mjs
+├─ next.config.ts
+├─ package-lock.json
+├─ package.json
+├─ postcss.config.mjs
+├─ prisma
+│  ├─ migrations
+│  │  ├─ 20250928104948_init
+│  │  │  └─ migration.sql
+│  │  ├─ 20251002101502_add_user_password
+│  │  │  └─ migration.sql
+│  │  ├─ 20251009121024_add_cascade_deletes
+│  │  │  └─ migration.sql
+│  │  ├─ 20251012100508_add_message_model
+│  │  │  └─ migration.sql
+│  │  └─ migration_lock.toml
+│  ├─ schema.prisma
+│  └─ seed.ts
+├─ project-progress.md
+├─ public
+│  └─ next.svg
+├─ scripts
+│  ├─ backup-db.sh
+│  ├─ db-studio.sh
+│  ├─ reset-db.sh
+│  └─ restore-db.sh
+├─ server.mjs
+├─ src
+│  ├─ app
+│  │  ├─ (authenticated)
+│  │  │  ├─ admin
+│  │  │  │  └─ users
+│  │  │  │     └─ page.tsx
+│  │  │  ├─ dashboard
+│  │  │  │  └─ page.tsx
+│  │  │  ├─ layout.tsx
+│  │  │  ├─ student
+│  │  │  │  ├─ courses
+│  │  │  │  │  ├─ [courseId]
+│  │  │  │  │  │  └─ lessons
+│  │  │  │  │  │     ├─ [lessonId]
+│  │  │  │  │  │     │  └─ page.tsx
+│  │  │  │  │  │     └─ page.tsx
+│  │  │  │  │  └─ page.tsx
+│  │  │  │  └─ enroll
+│  │  │  │     └─ page.tsx
+│  │  │  ├─ teacher
+│  │  │  │  └─ courses
+│  │  │  │     ├─ [courseId]
+│  │  │  │     │  └─ lessons
+│  │  │  │     │     └─ page.tsx
+│  │  │  │     └─ page.tsx
+│  │  │  └─ test-socket
+│  │  │     └─ page.tsx
+│  │  ├─ (public)
+│  │  │  ├─ auth
+│  │  │  │  ├─ error
+│  │  │  │  │  └─ page.tsx
+│  │  │  │  ├─ signin
+│  │  │  │  │  └─ page.tsx
+│  │  │  │  └─ signup
+│  │  │  │     └─ page.tsx
+│  │  │  └─ layout.tsx
+│  │  ├─ api
+│  │  │  ├─ admin
+│  │  │  │  ├─ generate-teacher-code
+│  │  │  │  │  └─ route.ts
+│  │  │  │  └─ users
+│  │  │  │     ├─ [id]
+│  │  │  │     │  └─ route.ts
+│  │  │  │     └─ route.ts
+│  │  │  ├─ auth
+│  │  │  │  └─ [...nextauth]
+│  │  │  │     └─ route.ts
+│  │  │  ├─ chat
+│  │  │  │  ├─ generate-response
+│  │  │  │  │  └─ route.ts
+│  │  │  │  └─ messages
+│  │  │  │     └─ route.ts
+│  │  │  ├─ seed-check
+│  │  │  │  └─ route.ts
+│  │  │  ├─ student
+│  │  │  │  ├─ courses
+│  │  │  │  │  └─ route.ts
+│  │  │  │  └─ enroll
+│  │  │  │     └─ route.ts
+│  │  │  ├─ teacher
+│  │  │  │  └─ courses
+│  │  │  │     ├─ [courseId]
+│  │  │  │     │  ├─ lessons
+│  │  │  │     │  │  ├─ [id]
+│  │  │  │     │  │  │  └─ route.ts
+│  │  │  │     │  │  └─ route.ts
+│  │  │  │     │  └─ route.ts
+│  │  │  │     └─ route.ts
+│  │  │  └─ test
+│  │  │     └─ route.ts
+│  │  ├─ favicon.ico
+│  │  ├─ globals.css
+│  │  ├─ layout.tsx
+│  │  └─ page.tsx
+│  ├─ auth.ts
+│  ├─ components
+│  │  ├─ admin
+│  │  │  ├─ create-user-button.tsx
+│  │  │  ├─ delete-user-modal.tsx
+│  │  │  ├─ edit-user-modal.tsx
+│  │  │  ├─ user-form-modal.tsx
+│  │  │  └─ users-table.tsx
+│  │  ├─ sign-out-button.tsx
+│  │  ├─ student
+│  │  │  ├─ chat-interface.tsx
+│  │  │  ├─ enrollment-form.tsx
+│  │  │  ├─ lesson-summary.tsx
+│  │  │  ├─ lesson-tabs.tsx
+│  │  │  └─ student-course-card.tsx
+│  │  ├─ teacher
+│  │  │  ├─ course-form-modal.tsx
+│  │  │  ├─ courses-table.tsx
+│  │  │  ├─ create-course-button.tsx
+│  │  │  ├─ create-lesson-button.tsx
+│  │  │  ├─ delete-course-modal.tsx
+│  │  │  ├─ delete-lesson-modal.tsx
+│  │  │  ├─ edit-course-modal.tsx
+│  │  │  ├─ edit-lesson-modal.tsx
+│  │  │  ├─ lesson-form-modal.tsx
+│  │  │  └─ lessons-table.tsx
+│  │  └─ ui
+│  │     ├─ alert.tsx
+│  │     ├─ badge.tsx
+│  │     ├─ button.tsx
+│  │     ├─ card.tsx
+│  │     ├─ dialog.tsx
+│  │     ├─ form.tsx
+│  │     ├─ input.tsx
+│  │     ├─ label.tsx
+│  │     ├─ table.tsx
+│  │     ├─ tabs.tsx
+│  │     └─ textarea.tsx
+│  ├─ hooks
+│  │  ├─ useChatSocket.ts
+│  │  └─ useSocket.ts
+│  ├─ lib
+│  │  ├─ openai.ts
+│  │  ├─ prisma.ts
+│  │  ├─ utils
+│  │  │  ├─ generate-lesson-code.ts
+│  │  │  └─ generate-teacher-code.ts
+│  │  ├─ utils.ts
+│  │  └─ validations
+│  │     ├─ course.ts
+│  │     ├─ enrollment.ts
+│  │     ├─ lesson.ts
+│  │     └─ user.ts
+│  └─ types
+│     ├─ api.ts
+│     ├─ dashboard.ts
+│     └─ next-auth.d.ts
+└─ tsconfig.json
+
+```
