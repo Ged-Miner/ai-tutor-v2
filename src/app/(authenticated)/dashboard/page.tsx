@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { DashboardData, CourseWithCounts, EnrollmentWithCourse } from "@/types/dashboard";
+import Link from 'next/link';
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -111,9 +112,10 @@ export default async function DashboardPage() {
           {dashboardData.courses && dashboardData.courses.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {dashboardData.courses.map((course: CourseWithCounts) => (
-                <div
+                <Link
                   key={course.id}
-                  className="bg-white rounded-lg shadow p-6 hover:shadow-md transition"
+                  href={`/teacher/courses/${course.id}/lessons`}
+                  className="bg-white rounded-lg shadow p-6 hover:shadow-md transition block"
                 >
                   <h3 className="font-semibold text-gray-900 mb-2">
                     {course.name}
@@ -129,7 +131,7 @@ export default async function DashboardPage() {
                       {course._count.enrollments} students
                     </span>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (
@@ -149,9 +151,10 @@ export default async function DashboardPage() {
           {dashboardData.enrollments && dashboardData.enrollments.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {dashboardData.enrollments.map((enrollment: EnrollmentWithCourse) => (
-                <div
+                <Link
                   key={enrollment.id}
-                  className="bg-white rounded-lg shadow p-6 hover:shadow-md transition"
+                  href={`/student/courses/${enrollment.course.id}/lessons`}
+                  className="bg-white rounded-lg shadow p-6 hover:shadow-md transition block"
                 >
                   <h3 className="font-semibold text-gray-900 mb-2">
                     {enrollment.course.name}
@@ -165,7 +168,7 @@ export default async function DashboardPage() {
                   <div className="text-sm text-gray-500">
                     {enrollment.course._count.lessons} lessons available
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (
@@ -177,6 +180,7 @@ export default async function DashboardPage() {
           )}
         </div>
       )}
+
     </div>
   );
 }
