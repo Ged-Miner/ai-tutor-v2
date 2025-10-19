@@ -3,11 +3,11 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { createLessonSchema } from '@/lib/validations/lesson';
 import { generateLessonCode } from '@/lib/utils/generate-lesson-code';
-// import { Prisma } from '@prisma/client';
 
 /**
  * GET /api/teacher/courses/[courseId]/lessons
  * Fetch all lessons for a specific course
+ * Teachers can only see their own course lessons, admins can see any course lessons
  */
 export async function GET(
   request: Request,
@@ -16,21 +16,23 @@ export async function GET(
   try {
     const session = await auth();
 
-    if (!session?.user || session.user.role !== 'TEACHER') {
+    if (!session?.user || (session.user.role !== 'TEACHER' && session.user.role !== 'ADMIN')) {
       return NextResponse.json(
-        { error: 'Unauthorized - Teacher access required' },
+        { error: 'Unauthorized - Teacher or Admin access required' },
         { status: 401 }
       );
     }
 
     const { courseId } = await params;
 
-    // Verify teacher owns this course
+    // Build query based on role
+    const whereClause = session.user.role === 'ADMIN'
+      ? { id: courseId } // Admin can see any course
+      : { id: courseId, teacherId: session.user.id }; // Teacher sees only their own
+
+    // Verify access to this course
     const course = await prisma.course.findFirst({
-      where: {
-        id: courseId,
-        teacherId: session.user.id,
-      },
+      where: whereClause,
     });
 
     if (!course) {
@@ -70,6 +72,7 @@ export async function GET(
 /**
  * POST /api/teacher/courses/[courseId]/lessons
  * Create a new lesson in a course
+ * Teachers can only create in their own courses, admins can create in any course
  */
 export async function POST(
   request: Request,
@@ -78,21 +81,23 @@ export async function POST(
   try {
     const session = await auth();
 
-    if (!session?.user || session.user.role !== 'TEACHER') {
+    if (!session?.user || (session.user.role !== 'TEACHER' && session.user.role !== 'ADMIN')) {
       return NextResponse.json(
-        { error: 'Unauthorized - Teacher access required' },
+        { error: 'Unauthorized - Teacher or Admin access required' },
         { status: 401 }
       );
     }
 
     const { courseId } = await params;
 
-    // Verify teacher owns this course
+    // Build query based on role
+    const whereClause = session.user.role === 'ADMIN'
+      ? { id: courseId } // Admin can create in any course
+      : { id: courseId, teacherId: session.user.id }; // Teacher creates only in their own
+
+    // Verify access to this course
     const course = await prisma.course.findFirst({
-      where: {
-        id: courseId,
-        teacherId: session.user.id,
-      },
+      where: whereClause,
     });
 
     if (!course) {

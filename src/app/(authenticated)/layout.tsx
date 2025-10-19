@@ -1,6 +1,7 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { SignOutButton } from '@/components/sign-out-button';
+import Link from 'next/link';
 
 export default async function AuthenticatedLayout({
   children,
@@ -37,7 +38,8 @@ export default async function AuthenticatedLayout({
             {/* Admin Navigation */}
             {session.user.role === 'ADMIN' && (
               <div className="flex">
-                <a href="/dashboard"
+                <Link
+                  href="/dashboard"
                   className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                 >
                   <svg
@@ -55,9 +57,10 @@ export default async function AuthenticatedLayout({
                     />
                   </svg>
                   Dashboard
-                </a>
+                </Link>
 
-                <a href="/admin/users"
+                <Link
+                  href="/admin/users"
                   className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                 >
                   <svg
@@ -75,15 +78,36 @@ export default async function AuthenticatedLayout({
                     />
                   </svg>
                   Manage Users
-                </a>
+                </Link>
+
+                <Link
+                  href="/admin/courses"
+                  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                    />
+                  </svg>
+                  Manage Courses
+                </Link>
               </div>
             )}
 
             {/* Teacher Navigation */}
             {session.user.role === 'TEACHER' && (
               <div className="flex">
-
-                <a href="/dashboard"
+                <Link
+                  href="/dashboard"
                   className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                 >
                   <svg
@@ -101,9 +125,10 @@ export default async function AuthenticatedLayout({
                     />
                   </svg>
                   Dashboard
-                </a>
+                </Link>
 
-                <a href="/teacher/courses"
+                <Link
+                  href="/teacher/courses"
                   className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                 >
                   <svg
@@ -121,15 +146,15 @@ export default async function AuthenticatedLayout({
                     />
                   </svg>
                   My Courses
-                </a>
+                </Link>
               </div>
             )}
 
             {/* Student Navigation */}
             {session.user.role === 'STUDENT' && (
               <div className="flex">
-
-                <a href="/dashboard"
+                <Link
+                  href="/dashboard"
                   className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                 >
                   <svg
@@ -147,9 +172,10 @@ export default async function AuthenticatedLayout({
                     />
                   </svg>
                   Dashboard
-                </a>
+                </Link>
 
-                <a href="/student/enroll"
+                <Link
+                  href="/student/enroll"
                   className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                 >
                   <svg
@@ -167,9 +193,10 @@ export default async function AuthenticatedLayout({
                     />
                   </svg>
                   Enroll in Course
-                </a>
+                </Link>
 
-                <a href="/student/courses"
+                <Link
+                  href="/student/courses"
                   className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                 >
                   <svg
@@ -187,7 +214,7 @@ export default async function AuthenticatedLayout({
                     />
                   </svg>
                   My Courses
-                </a>
+                </Link>
               </div>
             )}
           </nav>

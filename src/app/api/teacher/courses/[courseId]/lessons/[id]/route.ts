@@ -7,6 +7,7 @@ import { Prisma } from '@prisma/client';
 /**
  * GET /api/teacher/courses/[courseId]/lessons/[id]
  * Fetch a single lesson
+ * Teachers can only see their own course lessons, admins can see any lesson
  */
 export async function GET(
   request: Request,
@@ -15,24 +16,28 @@ export async function GET(
   try {
     const session = await auth();
 
-    if (!session?.user || session.user.role !== 'TEACHER') {
+    if (!session?.user || (session.user.role !== 'TEACHER' && session.user.role !== 'ADMIN')) {
       return NextResponse.json(
-        { error: 'Unauthorized - Teacher access required' },
+        { error: 'Unauthorized - Teacher or Admin access required' },
         { status: 401 }
       );
     }
 
     const { courseId, id } = await params;
 
-    // Verify teacher owns the course and lesson exists
+    // Build query based on role
+    const whereClause = session.user.role === 'ADMIN'
+      ? { id, courseId } // Admin can see any lesson
+      : {
+          id,
+          courseId,
+          course: {
+            teacherId: session.user.id,
+          },
+        }; // Teacher sees only their own
+
     const lesson = await prisma.lesson.findFirst({
-      where: {
-        id,
-        courseId,
-        course: {
-          teacherId: session.user.id,
-        },
-      },
+      where: whereClause,
       include: {
         _count: {
           select: {
@@ -62,6 +67,7 @@ export async function GET(
 /**
  * PUT /api/teacher/courses/[courseId]/lessons/[id]
  * Update a lesson
+ * Teachers can only update their own course lessons, admins can update any lesson
  */
 export async function PUT(
   request: Request,
@@ -70,24 +76,28 @@ export async function PUT(
   try {
     const session = await auth();
 
-    if (!session?.user || session.user.role !== 'TEACHER') {
+    if (!session?.user || (session.user.role !== 'TEACHER' && session.user.role !== 'ADMIN')) {
       return NextResponse.json(
-        { error: 'Unauthorized - Teacher access required' },
+        { error: 'Unauthorized - Teacher or Admin access required' },
         { status: 401 }
       );
     }
 
     const { courseId, id } = await params;
 
-    // Verify ownership
+    // Build query based on role
+    const whereClause = session.user.role === 'ADMIN'
+      ? { id, courseId } // Admin can update any lesson
+      : {
+          id,
+          courseId,
+          course: {
+            teacherId: session.user.id,
+          },
+        }; // Teacher updates only their own
+
     const existingLesson = await prisma.lesson.findFirst({
-      where: {
-        id,
-        courseId,
-        course: {
-          teacherId: session.user.id,
-        },
-      },
+      where: whereClause,
     });
 
     if (!existingLesson) {
@@ -160,6 +170,7 @@ export async function PUT(
 /**
  * DELETE /api/teacher/courses/[courseId]/lessons/[id]
  * Delete a lesson (cascade deletes chat sessions)
+ * Teachers can only delete their own course lessons, admins can delete any lesson
  */
 export async function DELETE(
   request: Request,
@@ -168,24 +179,28 @@ export async function DELETE(
   try {
     const session = await auth();
 
-    if (!session?.user || session.user.role !== 'TEACHER') {
+    if (!session?.user || (session.user.role !== 'TEACHER' && session.user.role !== 'ADMIN')) {
       return NextResponse.json(
-        { error: 'Unauthorized - Teacher access required' },
+        { error: 'Unauthorized - Teacher or Admin access required' },
         { status: 401 }
       );
     }
 
     const { courseId, id } = await params;
 
-    // Get lesson with counts for confirmation
+    // Build query based on role
+    const whereClause = session.user.role === 'ADMIN'
+      ? { id, courseId } // Admin can delete any lesson
+      : {
+          id,
+          courseId,
+          course: {
+            teacherId: session.user.id,
+          },
+        }; // Teacher deletes only their own
+
     const lesson = await prisma.lesson.findFirst({
-      where: {
-        id,
-        courseId,
-        course: {
-          teacherId: session.user.id,
-        },
-      },
+      where: whereClause,
       include: {
         _count: {
           select: {
