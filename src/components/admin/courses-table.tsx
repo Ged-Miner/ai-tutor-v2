@@ -47,11 +47,11 @@ export function CoursesTable({ courses }: CoursesTableProps) {
             <TableRow>
               <TableHead>Course Name</TableHead>
               <TableHead>Teacher</TableHead>
-              <TableHead>Description</TableHead>
+              {/* <TableHead>Description</TableHead> */}
               <TableHead>Lessons</TableHead>
-              <TableHead>Students</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              {/* <TableHead>Students</TableHead> */}
+              {/* <TableHead>Created</TableHead> */}
+              <TableHead className="text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -66,7 +66,7 @@ export function CoursesTable({ courses }: CoursesTableProps) {
                     </span>
                   </div>
                 </TableCell>
-                <TableCell className="max-w-md">
+                {/* <TableCell className="max-w-md">
                   <div className="line-clamp-2">
                     {course.description || (
                       <span className="italic text-muted-foreground">
@@ -74,12 +74,12 @@ export function CoursesTable({ courses }: CoursesTableProps) {
                       </span>
                     )}
                   </div>
-                </TableCell>
+                </TableCell> */}
                 <TableCell>{course._count.lessons}</TableCell>
-                <TableCell>{course._count.enrollments}</TableCell>
-                <TableCell>
+                {/* <TableCell>{course._count.enrollments}</TableCell> */}
+                {/* <TableCell>
                   {new Date(course.createdAt).toLocaleDateString()}
-                </TableCell>
+                </TableCell> */}
                 <TableCell className="text-right">
                   <Link href={`/admin/courses/${course.id}/lessons`}>
                     <Button variant="ghost" size="sm" className="mr-2">
