@@ -41,10 +41,10 @@ export function CoursesTable({ courses }: CoursesTableProps) {
           <TableHeader>
             <TableRow>
               <TableHead>Course Name</TableHead>
-              <TableHead>Description</TableHead>
+              {/* <TableHead>Description</TableHead> */}
               <TableHead>Lessons</TableHead>
               <TableHead>Students</TableHead>
-              <TableHead>Created</TableHead>
+              {/* <TableHead>Created</TableHead> */}
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -52,7 +52,7 @@ export function CoursesTable({ courses }: CoursesTableProps) {
             {courses.map((course) => (
               <TableRow key={course.id}>
                 <TableCell className="font-medium">{course.name}</TableCell>
-                <TableCell className="max-w-md">
+                {/* <TableCell className="max-w-md">
                   <div className="line-clamp-2">
                     {course.description || (
                       <span className="italic text-muted-foreground">
@@ -60,14 +60,13 @@ export function CoursesTable({ courses }: CoursesTableProps) {
                       </span>
                     )}
                   </div>
-                </TableCell>
+                </TableCell> */}
                 <TableCell>{course._count.lessons}</TableCell>
                 <TableCell>{course._count.enrollments}</TableCell>
-                <TableCell>
+                {/* <TableCell>
                   {new Date(course.createdAt).toLocaleDateString()}
-                </TableCell>
+                </TableCell> */}
                 <TableCell className="text-right">
-                  {/* ADD THIS LINK + BUTTON */}
                   <Link href={`/teacher/courses/${course.id}/lessons`}>
                     <Button variant="ghost" size="sm" className="mr-2">
                       View Lessons
