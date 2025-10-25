@@ -35,9 +35,13 @@ export default async function TeacherCoursesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Courses</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Welcome back, {session.user.name}!
+          </h1>
           <p className="mt-2 text-sm text-gray-600">
-            Manage your courses and lessons
+            {courses.length > 0
+              ? `Managing ${courses.length} ${courses.length === 1 ? 'course' : 'courses'}`
+              : 'Get started by creating your first course'}
           </p>
         </div>
         <CreateCourseButton />

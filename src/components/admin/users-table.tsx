@@ -4,7 +4,8 @@ import { useState } from 'react';
 import EditUserModal from './edit-user-modal';
 import DeleteUserModal from './delete-user-modal';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Pencil, Trash2 } from 'lucide-react';
+// import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -39,16 +40,16 @@ export default function UsersTable({ users }: UsersTableProps) {
 
   return (
     <>
-      <Card>
-        <Table>
+      <Card className="max-w-xl">
+        <Table >
           <TableHeader>
             <TableRow>
-              <TableHead>User</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Teacher Code</TableHead>
-              <TableHead>Activity</TableHead>
-              <TableHead>Joined</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="px-4">User</TableHead>
+              {/* <TableHead>Role</TableHead> */}
+              {/* <TableHead>Teacher Code</TableHead> */}
+              {/* <TableHead>Activity</TableHead> */}
+              {/* <TableHead>Joined</TableHead> */}
+              <TableHead className="text-right px-4">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -80,7 +81,7 @@ export default function UsersTable({ users }: UsersTableProps) {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  {/* <TableCell>
                     <Badge
                       variant={
                         user.role === 'ADMIN'
@@ -101,8 +102,8 @@ export default function UsersTable({ users }: UsersTableProps) {
                     ) : (
                       <span className="text-muted-foreground">—</span>
                     )}
-                  </TableCell>
-                  <TableCell>
+                  </TableCell> */}
+                  {/* <TableCell>
                     <div className="flex gap-3 text-sm">
                       {user._count.courses > 0 && (
                         <span title="Courses">📚 {user._count.courses}</span>
@@ -117,30 +118,33 @@ export default function UsersTable({ users }: UsersTableProps) {
                         <span className="text-muted-foreground">No activity</span>
                       )}
                     </div>
-                  </TableCell>
-                  <TableCell>
+                  </TableCell> */}
+                  {/* <TableCell>
                     {new Date(user.createdAt).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'short',
                       day: 'numeric'
                     })}
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setEditingUser(user)}
-                      className="mr-2"
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setDeletingUser(user)}
-                    >
-                      Delete
-                    </Button>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setEditingUser(user)}
+                        title="Edit user"
+                      >
+                        <Pencil className="h-4 w-4 text-green-600" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDeletingUser(user)}
+                        title="Delete user"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-600" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

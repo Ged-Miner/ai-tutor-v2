@@ -69,7 +69,7 @@ export default async function AdminUsersPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0 bg-blue-100 rounded-md p-3">
@@ -131,7 +131,7 @@ export default async function AdminUsersPage() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
         {/* Users Table */}
         <UsersTable users={users} />
       </div>
