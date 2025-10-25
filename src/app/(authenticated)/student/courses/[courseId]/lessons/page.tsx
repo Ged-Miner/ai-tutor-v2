@@ -96,7 +96,7 @@ export default async function StudentCourseLessonsPage({ params }: PageProps) {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+      {/* <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
           <dt className="truncate text-sm font-medium text-gray-500">
             Total Lessons
@@ -114,7 +114,7 @@ export default async function StudentCourseLessonsPage({ params }: PageProps) {
             {course._count.enrollments - 1}
           </dd>
         </div>
-      </div>
+      </div> */}
 
       {/* Lessons List */}
       {lessons.length > 0 ? (

@@ -48,7 +48,7 @@ export default async function AdminCoursesPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+      {/* <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
         <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
           <dt className="truncate text-sm font-medium text-gray-500">
             Total Courses
@@ -75,7 +75,7 @@ export default async function AdminCoursesPage() {
             {courses.reduce((sum, course) => sum + course._count.enrollments, 0)}
           </dd>
         </div>
-      </div>
+      </div> */}
 
       {/* Courses Table */}
       {courses.length > 0 ? (

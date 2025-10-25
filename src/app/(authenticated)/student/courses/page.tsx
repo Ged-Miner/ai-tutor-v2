@@ -51,9 +51,13 @@ export default async function StudentCoursesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Courses</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Welcome back, {session.user.name}!
+          </h1>
           <p className="mt-2 text-sm text-gray-600">
-            Courses you&apos;re enrolled in
+            {courses.length > 0
+              ? `You're enrolled in ${courses.length} ${courses.length === 1 ? 'course' : 'courses'}`
+              : 'Get started by enrolling in your first course'}
           </p>
         </div>
         <Link href="/student/enroll">
@@ -76,7 +80,7 @@ export default async function StudentCoursesPage() {
         </Link>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
         <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
           <dt className="truncate text-sm font-medium text-gray-500">
@@ -104,7 +108,7 @@ export default async function StudentCoursesPage() {
             {new Set(courses.map(c => c.teacher.id)).size}
           </dd>
         </div>
-      </div>
+      </div> */}
 
       {/* Courses Grid */}
       {courses.length > 0 ? (
