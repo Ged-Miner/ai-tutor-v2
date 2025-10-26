@@ -11,7 +11,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Pencil, Trash2 } from 'lucide-react';
+import { CreateLessonButton } from './create-lesson-button';
 
 interface Lesson {
   id: string;
@@ -38,15 +41,16 @@ export function LessonsTable({ lessons, courseId }: LessonsTableProps) {
 
   return (
     <>
-      <div className="rounded-lg border bg-white shadow">
+      {/* Desktop Table */}
+      <Card className="hidden md:block">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-16">Order</TableHead>
               <TableHead>Lesson Title</TableHead>
-              <TableHead>Lesson Code</TableHead>
-              <TableHead>Chat Sessions</TableHead>
-              <TableHead>Created</TableHead>
+              <TableHead className="hidden sm:table-cell">Lesson Code</TableHead>
+              <TableHead className="hidden sm:table-cell">Chat Sessions</TableHead>
+              {/* <TableHead className="hidden xl:table-cell">Created</TableHead> */}
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -57,38 +61,88 @@ export function LessonsTable({ lessons, courseId }: LessonsTableProps) {
                   {lesson.position + 1}
                 </TableCell>
                 <TableCell className="font-medium">{lesson.title}</TableCell>
-                <TableCell>
-                  <code className="rounded bg-gray-100 px-2 py-1 text-xs">
+                <TableCell className="hidden sm:table-cell">
+                  <code className="rounded bg-muted px-2 py-1 text-xs">
                     {lesson.lessonCode}
                   </code>
                 </TableCell>
-                <TableCell>{lesson._count.chatSessions}</TableCell>
-                <TableCell>
+                <TableCell className="hidden sm:table-cell">{lesson._count.chatSessions}</TableCell>
+                {/* <TableCell className="hidden xl:table-cell">
                   {new Date(lesson.createdAt).toLocaleDateString()}
-                </TableCell>
+                </TableCell> */}
                 <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setEditingLesson(lesson)}
-                    className="mr-2"
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setDeletingLesson(lesson)}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    Delete
-                  </Button>
+                  <div className="flex justify-end gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setEditingLesson(lesson)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setDeletingLesson(lesson)}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-600" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
+      </Card>
+
+      {/* Mobile Card Layout */}
+      <div className="md:hidden space-y-3">
+        {lessons.map((lesson) => (
+          <Card key={lesson.id} className="p-4">
+            <div className="space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-medium">
+                      {lesson.position + 1}
+                    </span>
+                    <h3 className="font-medium truncate">{lesson.title}</h3>
+                  </div>
+                  <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <span>Code:</span>
+                      <code className="rounded bg-muted px-2 py-0.5 text-xs">
+                        {lesson.lessonCode}
+                      </code>
+                    </div>
+                    <div className="flex gap-3">
+                      <span>{lesson._count.chatSessions} {lesson._count.chatSessions === 1 ? 'session' : 'sessions'}</span>
+                      <span>{new Date(lesson.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setEditingLesson(lesson)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setDeletingLesson(lesson)}
+                  >
+                    <Trash2 className="h-4 w-4 text-red-600" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Card>
+        ))}
       </div>
+
+      <CreateLessonButton courseId={courseId} />
 
       {/* Modals */}
       {editingLesson && (

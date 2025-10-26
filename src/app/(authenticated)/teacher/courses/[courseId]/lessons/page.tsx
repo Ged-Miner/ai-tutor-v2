@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { CreateLessonButton } from '@/components/teacher/create-lesson-button';
 import { LessonsTable } from '@/components/teacher/lessons-table';
-import { Button } from '@/components/ui/button';
+// import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 interface PageProps {
@@ -75,16 +75,16 @@ export default async function CourseLessonsPage({ params }: PageProps) {
             {course.description || 'No description'}
           </p>
         </div>
-        <div className="flex gap-3">
+        {/* <div className="flex gap-3">
           <Link href="/teacher/courses">
             <Button variant="outline">Back to Courses</Button>
           </Link>
           <CreateLessonButton courseId={courseId} />
-        </div>
+        </div> */}
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+      {/* <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
         <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
           <dt className="truncate text-sm font-medium text-gray-500">
             Total Lessons
@@ -111,7 +111,7 @@ export default async function CourseLessonsPage({ params }: PageProps) {
             {lessons.reduce((sum, lesson) => sum + lesson._count.chatSessions, 0)}
           </dd>
         </div>
-      </div>
+      </div> */}
 
       {/* Lessons Table */}
       {lessons.length > 0 ? (

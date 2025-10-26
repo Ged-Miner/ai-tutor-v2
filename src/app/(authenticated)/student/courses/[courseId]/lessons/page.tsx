@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
-import { Button } from '@/components/ui/button';
+// import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Link from 'next/link';
 
@@ -90,31 +90,10 @@ export default async function StudentCourseLessonsPage({ params }: PageProps) {
             Taught by {course.teacher.name || course.teacher.email}
           </p>
         </div>
-        <Link href="/student/courses">
+        {/* <Link href="/student/courses">
           <Button variant="outline">Back to Courses</Button>
-        </Link>
+        </Link> */}
       </div>
-
-      {/* Stats Cards */}
-      {/* <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-          <dt className="truncate text-sm font-medium text-gray-500">
-            Total Lessons
-          </dt>
-          <dd className="mt-1 text-3xl font-semibold text-gray-900">
-            {lessons.length}
-          </dd>
-        </div>
-
-        <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-          <dt className="truncate text-sm font-medium text-gray-500">
-            Classmates
-          </dt>
-          <dd className="mt-1 text-3xl font-semibold text-gray-900">
-            {course._count.enrollments - 1}
-          </dd>
-        </div>
-      </div> */}
 
       {/* Lessons List */}
       {lessons.length > 0 ? (
