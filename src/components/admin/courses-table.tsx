@@ -14,6 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card } from '@/components/ui/card';
+import { Pencil, Trash2, Eye } from 'lucide-react';
 
 interface Course {
   id: string;
@@ -41,24 +42,22 @@ export function CoursesTable({ courses }: CoursesTableProps) {
 
   return (
     <>
-      <Card>
+      {/* Desktop Table */}
+      <Card className="hidden md:block">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Course Name</TableHead>
-              <TableHead>Teacher</TableHead>
-              {/* <TableHead>Description</TableHead> */}
+              <TableHead className="hidden lg:table-cell">Teacher</TableHead>
               <TableHead>Lessons</TableHead>
-              {/* <TableHead>Students</TableHead> */}
-              {/* <TableHead>Created</TableHead> */}
-              <TableHead className="text-center">Actions</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {courses.map((course) => (
               <TableRow key={course.id}>
                 <TableCell className="font-medium">{course.name}</TableCell>
-                <TableCell>
+                <TableCell className="hidden lg:table-cell">
                   <div className="flex flex-col">
                     <span className="text-sm">{course.teacher.name || 'No name'}</span>
                     <span className="text-xs text-muted-foreground">
@@ -66,48 +65,80 @@ export function CoursesTable({ courses }: CoursesTableProps) {
                     </span>
                   </div>
                 </TableCell>
-                {/* <TableCell className="max-w-md">
-                  <div className="line-clamp-2">
-                    {course.description || (
-                      <span className="italic text-muted-foreground">
-                        No description
-                      </span>
-                    )}
-                  </div>
-                </TableCell> */}
                 <TableCell>{course._count.lessons}</TableCell>
-                {/* <TableCell>{course._count.enrollments}</TableCell> */}
-                {/* <TableCell>
-                  {new Date(course.createdAt).toLocaleDateString()}
-                </TableCell> */}
                 <TableCell className="text-right">
-                  <Link href={`/admin/courses/${course.id}/lessons`}>
-                    <Button variant="ghost" size="sm" className="mr-2">
-                      View Lessons
+                  <div className="flex justify-end gap-1">
+                    <Link href={`/admin/courses/${course.id}/lessons`}>
+                      <Button variant="ghost" size="sm">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setEditingCourse(course)}
+                    >
+                      <Pencil className="h-4 w-4" />
                     </Button>
-                  </Link>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setEditingCourse(course)}
-                    className="mr-2"
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setDeletingCourse(course)}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    Delete
-                  </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setDeletingCourse(course)}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-600" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </Card>
+
+      {/* Mobile Card Layout */}
+      <div className="md:hidden space-y-3">
+        {courses.map((course) => (
+          <Card key={course.id} className="p-4">
+            <div className="space-y-3">
+              <div>
+                <h3 className="font-medium">{course.name}</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {course.teacher.name || 'No name'}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {course.teacher.email}
+                </p>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">
+                  {course._count.lessons} {course._count.lessons === 1 ? 'lesson' : 'lessons'}
+                </span>
+                <div className="flex gap-1">
+                  <Link href={`/admin/courses/${course.id}/lessons`}>
+                    <Button variant="ghost" size="sm">
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setEditingCourse(course)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setDeletingCourse(course)}
+                  >
+                    <Trash2 className="h-4 w-4 text-red-600" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
 
       {/* Modals */}
       {editingCourse && (

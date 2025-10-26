@@ -60,24 +60,7 @@ export default async function StudentCoursesPage() {
               : 'Get started by enrolling in your first course'}
           </p>
         </div>
-        <Link href="/student/enroll">
-          <Button>
-            <svg
-              className="-ml-1 mr-2 h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            Enroll in More Courses
-          </Button>
-        </Link>
+
       </div>
 
       {/* Stats Cards
@@ -145,6 +128,24 @@ export default async function StudentCoursesPage() {
           </div>
         </div>
       )}
+      <Link href="/student/enroll">
+        <Button>
+          <svg
+            className="-ml-1 mr-2 h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
+          Enroll in a Course
+        </Button>
+      </Link>
     </div>
   );
 }

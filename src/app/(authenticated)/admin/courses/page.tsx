@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { CoursesTable } from '@/components/admin/courses-table';
 import { CreateCourseButton } from '@/components/admin/create-course-button';
+import Link from 'next/link';
 
 export default async function AdminCoursesPage() {
   const session = await auth();
@@ -44,38 +45,20 @@ export default async function AdminCoursesPage() {
             Manage all courses across the platform
           </p>
         </div>
-        <CreateCourseButton />
       </div>
 
-      {/* Stats Cards */}
-      {/* <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-        <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-          <dt className="truncate text-sm font-medium text-gray-500">
-            Total Courses
-          </dt>
-          <dd className="mt-1 text-3xl font-semibold text-gray-900">
-            {courses.length}
-          </dd>
-        </div>
-
-        <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-          <dt className="truncate text-sm font-medium text-gray-500">
-            Total Lessons
-          </dt>
-          <dd className="mt-1 text-3xl font-semibold text-gray-900">
-            {courses.reduce((sum, course) => sum + course._count.lessons, 0)}
-          </dd>
-        </div>
-
-        <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-          <dt className="truncate text-sm font-medium text-gray-500">
-            Total Enrollments
-          </dt>
-          <dd className="mt-1 text-3xl font-semibold text-gray-900">
-            {courses.reduce((sum, course) => sum + course._count.enrollments, 0)}
-          </dd>
-        </div>
-      </div> */}
+      {/* Breadcrumb */}
+      <nav className="mt-4 flex" aria-label="Breadcrumb">
+        <ol className="flex items-center space-x-2 text-sm text-gray-500">
+          <li>
+            <Link href="/dashboard" className="hover:text-gray-700">Dashboard</Link>
+          </li>
+          <li>
+            <span className="mx-2">/</span>
+          </li>
+          <li className="text-gray-900 font-medium">Courses</li>
+        </ol>
+      </nav>
 
       {/* Courses Table */}
       {courses.length > 0 ? (
@@ -106,6 +89,7 @@ export default async function AdminCoursesPage() {
           </div>
         </div>
       )}
+      <CreateCourseButton />
     </div>
   );
 }
