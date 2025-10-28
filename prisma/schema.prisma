@@ -23,6 +23,7 @@ model User {
   courses       Course[]
   enrollments   Enrollment[]
   chatSessions  ChatSession[]
+  pendingTranscripts PendingTranscript[]
 
   @@map("users")
 }
@@ -145,6 +146,26 @@ model Message {
 enum MessageRole {
   USER
   ASSISTANT
+}
+
+model PendingTranscript {
+  id              String   @id @default(cuid())
+  teacherId       String
+  teacherCode     String
+  courseName      String
+  lessonTitle     String
+  rawTranscript   String   @db.Text
+  capturedAt      DateTime
+  metadata        Json?
+  processed       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  teacher         User     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([teacherId])
+  @@index([teacherCode])
+  @@index([processed])
+  @@map("pending_transcripts")
 }
 
 model SystemPrompt {
