@@ -23,6 +23,7 @@ interface Lesson {
   position: number;
   rawTranscript: string;
   summary: string | null;
+  summaryStatus: string;
   customPrompt: string | null;
   createdAt: Date;
   _count: {
@@ -33,6 +34,47 @@ interface Lesson {
 interface LessonsTableProps {
   lessons: Lesson[];
   courseId: string;
+}
+
+function SummaryStatusBadge({
+  summaryStatus
+}: {
+  summaryStatus: string
+}) {
+  if (summaryStatus === 'COMPLETED') {
+    return (
+      <span className="inline-flex items-center gap-1 text-xs text-green-600">
+        <span className="w-2 h-2 rounded-full bg-green-600" />
+        Ready
+      </span>
+    );
+  }
+
+  if (summaryStatus === 'GENERATING') {
+    return (
+      <span className="inline-flex items-center gap-1 text-xs text-yellow-600">
+        <span className="w-2 h-2 rounded-full bg-yellow-600 animate-pulse" />
+        Generating
+      </span>
+    );
+  }
+
+  if (summaryStatus === 'FAILED') {
+    return (
+      <span className="inline-flex items-center gap-1 text-xs text-red-600">
+        <span className="w-2 h-2 rounded-full bg-red-600" />
+        Failed
+      </span>
+    );
+  }
+
+  // NOT_STARTED
+  return (
+    <span className="inline-flex items-center gap-1 text-xs text-gray-500">
+      <span className="w-2 h-2 rounded-full bg-gray-400" />
+      Not Started
+    </span>
+  );
 }
 
 export function LessonsTable({ lessons, courseId }: LessonsTableProps) {
@@ -49,8 +91,8 @@ export function LessonsTable({ lessons, courseId }: LessonsTableProps) {
               <TableHead className="w-16">Order</TableHead>
               <TableHead>Lesson Title</TableHead>
               <TableHead className="hidden sm:table-cell">Lesson Code</TableHead>
+              <TableHead className="hidden lg:table-cell">Summary</TableHead>
               <TableHead className="hidden sm:table-cell">Chat Sessions</TableHead>
-              {/* <TableHead className="hidden xl:table-cell">Created</TableHead> */}
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -65,6 +107,9 @@ export function LessonsTable({ lessons, courseId }: LessonsTableProps) {
                   <code className="rounded bg-muted px-2 py-1 text-xs">
                     {lesson.lessonCode}
                   </code>
+                </TableCell>
+                <TableCell className="hidden lg:table-cell"> {/* ADD THIS */}
+                  <SummaryStatusBadge summaryStatus={lesson.summaryStatus} />
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">{lesson._count.chatSessions}</TableCell>
                 {/* <TableCell className="hidden xl:table-cell">
@@ -113,6 +158,10 @@ export function LessonsTable({ lessons, courseId }: LessonsTableProps) {
                       <code className="rounded bg-muted px-2 py-0.5 text-xs">
                         {lesson.lessonCode}
                       </code>
+                    </div>
+                    <div className="flex items-center gap-2"> {/* ADD THIS */}
+                      <span>Summary:</span>
+                      <SummaryStatusBadge summaryStatus={lesson.summaryStatus} />
                     </div>
                     <div className="flex gap-3">
                       <span>{lesson._count.chatSessions} {lesson._count.chatSessions === 1 ? 'session' : 'sessions'}</span>

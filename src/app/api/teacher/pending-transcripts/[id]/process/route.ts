@@ -109,6 +109,7 @@ export async function POST(
         title: customTitle || pendingTranscript.lessonTitle,
         rawTranscript: pendingTranscript.rawTranscript,
         summary: null, // Will be generated asynchronously
+        summaryStatus: 'GENERATING',
         lessonCode,
         position,
         courseId,
