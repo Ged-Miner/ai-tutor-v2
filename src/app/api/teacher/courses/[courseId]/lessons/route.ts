@@ -143,6 +143,7 @@ export async function POST(
         title,
         rawTranscript,
         summary: summary || null,
+        summaryStatus: summary ? 'COMPLETED' : 'NOT_STARTED',
         customPrompt: customPrompt || null,
         lessonCode,
         position: lessonPosition,

@@ -134,6 +134,10 @@ export async function PUT(
 
     if (validationResult.data.summary !== undefined) {
       updateData.summary = validationResult.data.summary || null;
+      // If they're adding/editing a summary, mark it as completed
+      if (validationResult.data.summary) {
+        updateData.summaryStatus = 'COMPLETED';
+      }
     }
 
     if (validationResult.data.customPrompt !== undefined) {

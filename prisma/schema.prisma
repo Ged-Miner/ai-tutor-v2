@@ -83,6 +83,7 @@ model Lesson {
   title         String
   rawTranscript String    @db.Text
   summary       String?   @db.Text
+  summaryStatus SummaryStatus @default(NOT_STARTED)
   lessonCode    String    @unique
   position      Int
   customPrompt  String?   @db.Text
@@ -184,4 +185,11 @@ enum Role {
   ADMIN
   TEACHER
   STUDENT
+}
+
+enum SummaryStatus {
+  NOT_STARTED    // Manual lesson, no generation queued
+  GENERATING     // AI is actively generating
+  COMPLETED      // Summary has been generated
+  FAILED         // Generation failed
 }

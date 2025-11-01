@@ -64,6 +64,11 @@ export async function generateLessonSummary(
  * This is called after a lesson is created from a pending transcript
  * @param lessonId - The ID of the lesson to update
  */
+/**
+ * Update a lesson with its generated summary
+ * This is called after a lesson is created from a pending transcript
+ * @param lessonId - The ID of the lesson to update
+ */
 export async function generateAndUpdateLessonSummary(
   lessonId: string
 ): Promise<void> {
@@ -96,16 +101,27 @@ export async function generateAndUpdateLessonSummary(
       lesson.title
     );
 
-    // Update lesson with summary
+    // Update lesson with summary AND mark as COMPLETED
     await prisma.lesson.update({
       where: { id: lessonId },
-      data: { summary },
+      data: {
+        summary,
+        summaryStatus: 'COMPLETED',  // ADD THIS LINE
+      },
     });
 
     console.log(`Successfully generated summary for lesson ${lessonId}`);
   } catch (error) {
     console.error(`Failed to generate summary for lesson ${lessonId}:`, error);
+
+    // Mark as FAILED so UI can show appropriate message
+    await prisma.lesson.update({
+      where: { id: lessonId },
+      data: { summaryStatus: 'FAILED' },  // ADD THIS BLOCK
+    }).catch(err => {
+      console.error(`Failed to mark lesson ${lessonId} as FAILED:`, err);
+    });
+
     // Don't throw - we don't want to fail the whole lesson creation
-    // The lesson exists, just without a summary for now
   }
 }
