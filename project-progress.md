@@ -1,6 +1,6 @@
 # AI Tutor 2.0 - Project Progress (Updated)
 
-**Last Updated:** October 26, 2025
+**Last Updated:** November 2, 2025
 **Development Timeline:** Started September 29, 2025
 **Target Completion:** December 15, 2025
 
@@ -413,11 +413,18 @@ OpenAI generates response (context: lesson + history)
 AI response broadcast to all students
 ```
 
+**Transcript Summarization:**
+- ✅ Automatic transcript summarization endpoint (`generateAndUpdateLessonSummary`)
+- ✅ Background summary generation triggered on transcript import
+- ✅ SummaryStatus enum to track generation state (NOT_STARTED, GENERATING, COMPLETED, FAILED)
+- ✅ Teacher can manually write summaries for custom lessons
+- ✅ Summary status badges with visual indicators
+- ✅ Automatic retry logic on failed generations
+
 **Not Yet Implemented:**
-- ❌ Automatic transcript summarization endpoint (planned but not called)
 - ❌ Streaming responses
 - ❌ Token usage tracking
-- ❌ Rate limiting
+- ❌ Rate limiting (planned for Phase 10)
 - ❌ Admin UI for prompt editing
 
 ---
@@ -471,21 +478,46 @@ AI response broadcast to all students
 
 ## 🔄 In Progress / Next Steps
 
-### Phase 10: Chrome Extension Integration (UPCOMING)
+### Phase 9B: Lesson Summary Management (COMPLETE)
+
+**Objectives:** Allow teachers to manage lesson summaries with proper state tracking
+
+**Accomplishments:**
+- ✅ Added `SummaryStatus` enum (NOT_STARTED, GENERATING, COMPLETED, FAILED)
+- ✅ Added `summaryStatus` field to Lesson model
+- ✅ Database migration for new field
+- ✅ Updated lesson creation endpoints to set appropriate status
+- ✅ Automatic status updates during AI generation
+- ✅ Updated edit lesson modal with multi-state UI:
+  - Shows spinner only when `GENERATING`
+  - Shows error state when `FAILED`
+  - Shows editable textarea when `NOT_STARTED` or `COMPLETED`
+- ✅ Teachers can now manually write summaries for custom lessons
+- ✅ Summary status badges with visual indicators (green/yellow/red/gray)
+- ✅ Proper conflict handling for transcript imports vs manual summaries
+
+---
+
+### Phase 10: Chrome Extension Integration (IN PROGRESS)
 
 **Objectives:** Connect Chrome extension and implement automatic lesson creation
 
-**Planned Tasks:**
-- [ ] API endpoints for Chrome extension
-- [ ] CORS configuration for extension origin
-- [ ] Rate limiting
-- [ ] Request validation with Zod
-- [ ] Handle multiple transcript uploads
-- [ ] Automatic summary generation when transcript uploaded
-- [ ] Mock extension for testing
-- [ ] Error handling and retry logic
+**Completed Tasks:**
+- ✅ Mock Chrome extension UI (`/mock-extension` page)
+- ✅ Transcript upload endpoint at `/api/transcript/upload`
+- ✅ PendingTranscript model and database schema
+- ✅ Teacher code validation for secure uploads
+- ✅ Error handling and response types
 
-**Estimated Time:** 4-5 hours
+**Remaining Tasks:**
+- [ ] CORS configuration for extension origin
+- [ ] Rate limiting for transcript uploads
+- [ ] Request validation with Zod (already implemented)
+- [ ] Handle multiple transcript uploads (already implemented)
+- [ ] Test with real Chrome extension
+- [ ] Error handling documentation
+
+**Estimated Time:** 2-3 hours (mostly CORS + rate limiting)
 
 ---
 
@@ -508,29 +540,46 @@ AI response broadcast to all students
 
 ---
 
-### Phase 11: Deployment & DevOps (FINAL)
+### Phase 12: Deployment & DevOps (PLANNED)
 
-**Objectives:** Deploy to production VPS with proper DevOps setup
+**Objectives:** Deploy to production with Railway
+
+**Deployment Platform:** Railway.app (Hobby tier, ~$5-15/month)
 
 **Planned Tasks:**
-- [ ] Provision VPS (Hetzner ~$4-5/month)
-- [ ] Server hardening (SSH, firewall, fail2ban)
-- [ ] Docker and Docker Compose setup
-- [ ] Nginx reverse proxy
-- [ ] SSL with Let's Encrypt
+- [ ] Create Railway account and project
+- [ ] Connect GitHub repository for auto-deployment
+- [ ] Configure PostgreSQL database on Railway
+- [ ] Set environment variables (API keys, secrets, database URL)
+- [ ] Run initial migration and seed
+- [ ] Test deployment and Socket.io connections
+- [ ] Configure custom domain
+- [ ] SSL setup (handled by Railway)
+- [ ] Monitoring and logs configuration
 - [ ] Automated backups
-- [ ] Monitoring setup (Uptime Kuma)
-- [ ] CI/CD pipeline (optional)
-- [ ] Performance optimization
-- [ ] Load testing
+- [ ] Database connection pooling setup
 
-**Estimated Time:** 6-8 hours
+**Key Setup Steps:**
+```bash
+# Environment variables needed:
+DATABASE_URL=postgresql://...@railway.app
+NEXTAUTH_URL=https://your-domain.com
+NEXTAUTH_SECRET=[generate-new-secret]
+AUTH_SECRET=[generate-new-secret]
+OPENAI_API_KEY=sk-...
+AUTH_GOOGLE_ID=... (if using Google OAuth)
+AUTH_GOOGLE_SECRET=...
+```
+
+**Note:** Product owner's team will have direct GitHub push access + Railway dashboard visibility for logs, metrics, and environment management.
+
+**Estimated Time:** 2-3 hours
 
 ---
 
 ## 📊 Overall Progress Summary
 
-### Completed (Weeks 1-8+) ✅
+### Completed (Weeks 1-9+) ✅
 - ✅ Development environment with Docker
 - ✅ PostgreSQL database with complete schema
 - ✅ Prisma ORM with migrations and seed data
@@ -564,18 +613,20 @@ AI response broadcast to all students
 - ✅ **Real-time AI response broadcasting**
 - ✅ **Mobile-first responsive design**
 - ✅ **Responsive table/card components**
+- ✅ **Lesson summary status management**
+- ✅ **Automatic transcript summarization with state tracking**
 
-### In Progress / Next (Weeks 9-11) ⏳
-- 🎯 Chrome extension API endpoints (Week 9) - **NEXT**
-- ⏳ Automatic transcript summarization
+### In Progress / Next (Weeks 9-12) ⏳
+- 🎯 Chrome extension CORS + rate limiting (Week 9-10) - **NEXT**
 - ⏳ Admin UI for prompt management
-- ⏳ Advanced features (streaming, rate limiting, etc.)
-- ⏳ VPS deployment with Docker (Week 10-11)
+- ⏳ Advanced features (streaming, token tracking, etc.)
+- ⏳ Railway deployment with auto-scaling (Week 11-12)
 
 ### Timeline
 - **Weeks 1-6:** ✅ Complete (Sept 29 - Oct 12, 2025) - Core Platform
 - **Weeks 7-8:** ✅ Complete (Oct 13 - Oct 26, 2025) - Real-Time AI + Mobile Redesign
-- **Weeks 9-11:** ⏳ Remaining (Oct 27 - Dec 15, 2025) - Polish & Deploy
+- **Weeks 9:** ✅ Complete (Oct 27 - Nov 2, 2025) - Summary Management + Deployment Planning
+- **Weeks 10-12:** ⏳ Remaining (Nov 3 - Dec 15, 2025) - Polish, CORS/Rate Limiting, & Railway Deploy
 - **Target Launch:** December 15, 2025
 
 ---
@@ -596,8 +647,9 @@ AI response broadcast to all students
 - ✅ **Real-time WebSocket communication**
 - ✅ **AI-powered chat responses**
 - ✅ **Mobile-responsive design**
-- ⏳ Chrome extension integration
-- ⏳ Production deployment on VPS
+- ✅ **Lesson summary state management**
+- ⏳ Chrome extension CORS + rate limiting
+- ⏳ Production deployment on Railway
 - ⏳ <200ms API response time
 - ⏳ 99% uptime
 
@@ -618,8 +670,10 @@ AI response broadcast to all students
 - ✅ **Custom Next.js server**
 - ✅ **Real-time event broadcasting**
 - ✅ **Mobile-first responsive design patterns**
-- ⏳ Linux server administration
-- ⏳ DevOps practices
+- ✅ **Async state management patterns (fire-and-forget jobs)**
+- ⏳ CORS configuration for extensions
+- ⏳ Rate limiting strategies
+- ⏳ Railway deployment and management
 
 ### Business Goals
 - ✅ Teachers can create and manage courses
@@ -630,9 +684,11 @@ AI response broadcast to all students
 - ✅ **AI tutor responds to student questions in real-time**
 - ✅ **Multiple students can collaborate in lesson chat rooms**
 - ✅ **Mobile-friendly for classroom use**
+- ✅ **Teachers can manually write/edit lesson summaries**
+- ✅ **Automatic transcript summarization with AI**
 - ⏳ Support 100-200 concurrent users (needs load testing)
 - ⏳ Automatic lesson creation from transcripts (Chrome extension)
-- ⏳ Stay within ¥10,000/month budget (monitoring needed)
+- ⏳ Stay within $56-106/month budget for Railway + OpenAI (monitored)
 
 ---
 
@@ -678,6 +734,21 @@ AI response broadcast to all students
 - `src/components/admin/course-form-modal.tsx` - Admin course form
 - `src/components/admin/edit-course-modal.tsx` - Admin course editing
 - `src/components/admin/delete-course-modal.tsx` - Admin course deletion
+
+**Transcript Summarization:**
+- `src/lib/openai-summary.ts` - Automatic summary generation with state tracking
+- `prisma/schema.prisma` - SummaryStatus enum and summaryStatus field
+- `src/app/api/teacher/pending-transcripts/[id]/process/route.ts` - Transcript import with async summarization
+
+**Lesson Summary Management:**
+- `src/components/teacher/edit-lesson-modal.tsx` - Multi-state summary UI
+- `src/components/teacher/lessons-table.tsx` - Summary status badges
+- `src/app/api/teacher/courses/[courseId]/lessons/route.ts` - Summary status on creation
+- `src/app/api/teacher/courses/[courseId]/lessons/[id]/route.ts` - Summary status on update
+
+**Chrome Extension (Mock Testing):**
+- `src/app/(public)/mock-extension/page.tsx` - Mock extension UI for testing
+- `src/app/api/transcript/upload/route.ts` - Transcript upload endpoint
 
 ---
 
@@ -767,6 +838,20 @@ AI response broadcast to all students
 ---
 
 ## 💡 Key Learnings This Session
+
+### Async State Management
+- ✅ Using enums to track async operation states (NOT_STARTED, GENERATING, COMPLETED, FAILED)
+- ✅ Fire-and-forget background jobs with proper error handling
+- ✅ Never relying on nullable fields alone to determine state (use explicit status field)
+- ✅ Clear UI differentiation for each state
+- ✅ Retry logic and failure recovery patterns
+
+### Hosting Architecture Decisions
+- ✅ Understanding fundamental differences between serverless (Vercel) and container platforms (Railway)
+- ✅ Socket.io requires persistent servers, not serverless functions
+- ✅ Railway is better for full-stack apps with custom servers
+- ✅ Proper cost estimation including usage-based fees
+- ✅ Team access and deployment workflows matter for product owners
 
 ### TypeScript Best Practices
 - ✅ Never use `any` - define proper types
@@ -859,35 +944,49 @@ AI response broadcast to all students
 11. **OpenAI API integration for AI tutoring**
 12. **Automatic AI responses grounded in lesson content**
 13. **Mobile-first responsive design across all tables**
+14. **Lesson summary state management (NOT_STARTED → GENERATING → COMPLETED/FAILED)**
+15. **Async background job handling for transcript summarization**
+16. **Multi-state UI components based on operation status**
 
 **📍 Current Position:**
-- **Fully functional AI tutor platform**
+- **Fully functional AI tutor platform with state-managed features**
 - Teachers can create and manage courses/lessons
+- Teachers can write custom summaries OR auto-generate from transcripts
 - Students can access content and chat with AI in real-time
 - Multiple students can collaborate in lesson chat rooms
 - AI responds intelligently based on lesson content
 - Mobile-optimized for classroom use
-- Ready for Chrome extension integration
+- Ready for Chrome extension CORS + rate limiting
+- **Deployment strategy: Railway.app Hobby tier (~$5-15/month)**
 
-**🎯 Next Milestone:**
-- Chrome extension API endpoints
-- Automatic transcript upload from browser
-- Automatic summary generation
-- Production deployment on VPS
+**🎯 Next Milestones:**
+1. Chrome extension CORS configuration + rate limiting
+2. Admin UI for system prompt management
+3. Railway production deployment
+4. Load testing for 100-200 concurrent users
 
 ---
 
-## 🚀 Ready for Week 9
+## 🚀 Ready for Weeks 10-12
 
-With **85% of the project complete**, the core AI tutoring platform is fully operational! The real-time chat works beautifully, AI responses are contextually relevant, and the mobile experience is smooth.
+With **~90% of the project complete**, the core AI tutoring platform is fully operational with proper state management! The real-time chat works beautifully, AI responses are contextually relevant, transcript summarization is automatic, and the mobile experience is smooth.
+
+**Week 9 Achievements:**
+1. ✅ Implemented lesson summary state management with 4-state enum
+2. ✅ Fixed infinite spinner issue for custom lessons
+3. ✅ Teachers can now write summaries from scratch when not auto-generating
+4. ✅ Finalized deployment strategy (Railway Hobby tier)
+5. ✅ Established clear product owner team access model
 
 **What's Next:**
-1. Build API endpoints for Chrome extension
-2. Implement automatic transcript summarization
+1. Add CORS configuration for Chrome extension
+2. Implement rate limiting for transcript uploads
 3. Add admin UI for system prompt management
-4. Polish advanced features (streaming, rate limiting)
-5. Deploy to production VPS
+4. Polish advanced features (streaming, token tracking)
+5. Deploy to Railway.app with GitHub integration
 
-**Major Achievement:** The platform now delivers on its core promise - students can ask questions about lessons and receive AI-powered tutoring in real-time, with multiple students collaborating together.
+**Major Achievement:** The platform now delivers on its core promise with resilient state management - students can ask questions about lessons and receive AI-powered tutoring in real-time, teachers can manage summaries flexibly, and multiple students can collaborate together.
 
-Let's finish strong! 🎓
+**Deployment Ready:** With Railway chosen as the hosting platform, the product owner's team will have direct GitHub push access and full visibility into logs, metrics, and environment management. Perfect for hands-on server-side access.
+
+Let's finish strong and get to production! 🎓🚀

@@ -27,13 +27,36 @@ app.prepare().then(() => {
   });
 
   // Create Socket.io server
+  // CORS configuration for Socket.io
+  const allowedOrigins = [
+    process.env.NEXTAUTH_URL || 'http://localhost:3000',
+    'chrome-extension://*', // Allow any Chrome extension
+  ];
+
   const io = new Server(httpServer, {
     cors: {
-      origin: process.env.NEXTAUTH_URL || `http://localhost:${port}`,
-      methods: ['GET', 'POST'],
+      origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps, Postman, or curl)
+        if (!origin) return callback(null, true);
+
+        // Check if origin matches allowed patterns
+        const isAllowed = allowedOrigins.some(allowedOrigin => {
+          if (allowedOrigin.includes('*')) {
+            // Pattern matching for chrome-extension://*
+            const pattern = allowedOrigin.replace(/\*/g, '.*');
+            return new RegExp(`^${pattern}$`).test(origin);
+          }
+          return origin === allowedOrigin;
+        });
+
+        if (isAllowed) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      },
       credentials: true,
     },
-    path: '/socket.io/',
   });
 
   // Socket.io connection handling
