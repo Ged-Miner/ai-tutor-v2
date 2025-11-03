@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface SystemPrompt {
@@ -40,15 +40,28 @@ export default function EditPromptModal({ isOpen, onClose, prompt }: EditPromptM
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [willDeactivateOthers, setWillDeactivateOthers] = useState(false);
 
   const {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<UpdateSystemPromptInput>({
     resolver: zodResolver(updateSystemPromptSchema),
   });
+
+  const isActiveValue = watch('isActive');
+
+  // Check if this is a tutor prompt and if activating it will deactivate others
+  useEffect(() => {
+    if (prompt && isActiveValue && prompt.name.includes('tutor')) {
+      setWillDeactivateOthers(true);
+    } else {
+      setWillDeactivateOthers(false);
+    }
+  }, [isActiveValue, prompt]);
 
   // Reset form when prompt changes
   useEffect(() => {
@@ -95,10 +108,13 @@ export default function EditPromptModal({ isOpen, onClose, prompt }: EditPromptM
   // Close and reset form
   const handleClose = () => {
     setError(null);
+    setWillDeactivateOthers(false);
     onClose();
   };
 
   if (!prompt) return null;
+
+  const isTutorPrompt = prompt.name.includes('tutor');
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -119,6 +135,16 @@ export default function EditPromptModal({ isOpen, onClose, prompt }: EditPromptM
             </Alert>
           )}
 
+          {/* Auto-deactivation Warning */}
+          {willDeactivateOthers && (
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Note:</strong> Activating this tutor prompt will automatically deactivate all other active tutor prompts.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Prompt Info */}
           <div className="rounded-lg bg-muted p-4 space-y-2">
             <div className="flex items-center justify-between">
@@ -126,7 +152,12 @@ export default function EditPromptModal({ isOpen, onClose, prompt }: EditPromptM
                 <div className="text-sm font-medium">Name</div>
                 <div className="text-sm text-muted-foreground">{prompt.name}</div>
               </div>
-              <Badge variant="outline">v{prompt.version}</Badge>
+              <div className="flex gap-2">
+                <Badge variant="outline">v{prompt.version}</Badge>
+                {isTutorPrompt && (
+                  <Badge variant="secondary">Tutor</Badge>
+                )}
+              </div>
             </div>
             <div className="text-xs text-muted-foreground">
               Last updated: {new Date(prompt.updatedAt).toLocaleString()}
@@ -160,7 +191,7 @@ export default function EditPromptModal({ isOpen, onClose, prompt }: EditPromptM
               className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
             />
             <Label htmlFor="isActive" className="text-sm font-normal cursor-pointer">
-              Active (use this prompt in production)
+              Active {isTutorPrompt && '(only one tutor prompt can be active at a time)'}
             </Label>
           </div>
           {errors.isActive && (

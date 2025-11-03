@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createSystemPromptSchema } from '@/lib/validations/system-prompt';
@@ -18,9 +18,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, AlertTriangle } from 'lucide-react';
 
-// Form input type (before schema transformation)
 type PromptFormInput = {
   name: string;
   content: string;
@@ -36,11 +35,13 @@ export default function PromptFormModal({ isOpen, onClose }: PromptFormModalProp
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [willDeactivateOthers, setWillDeactivateOthers] = useState(false);
 
   const {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<PromptFormInput>({
     resolver: zodResolver(createSystemPromptSchema),
@@ -50,6 +51,18 @@ export default function PromptFormModal({ isOpen, onClose }: PromptFormModalProp
       isActive: true,
     },
   });
+
+  const nameValue = watch('name');
+  const isActiveValue = watch('isActive');
+
+  // Check if this will be a tutor prompt and if it will deactivate others
+  useEffect(() => {
+    if (nameValue && nameValue.includes('tutor') && isActiveValue) {
+      setWillDeactivateOthers(true);
+    } else {
+      setWillDeactivateOthers(false);
+    }
+  }, [nameValue, isActiveValue]);
 
   // Handle form submission
   const onSubmit = async (data: PromptFormInput) => {
@@ -86,6 +99,7 @@ export default function PromptFormModal({ isOpen, onClose }: PromptFormModalProp
   const handleClose = () => {
     reset();
     setError(null);
+    setWillDeactivateOthers(false);
     onClose();
   };
 
@@ -108,6 +122,16 @@ export default function PromptFormModal({ isOpen, onClose }: PromptFormModalProp
             </Alert>
           )}
 
+          {/* Auto-deactivation Warning */}
+          {willDeactivateOthers && (
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Note:</strong> Creating an active tutor prompt will automatically deactivate all other active tutor prompts.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Name Field */}
           <div className="space-y-2">
             <Label htmlFor="name">Prompt Name *</Label>
@@ -121,7 +145,7 @@ export default function PromptFormModal({ isOpen, onClose }: PromptFormModalProp
               <p className="text-sm text-destructive">{errors.name.message}</p>
             )}
             <p className="text-xs text-muted-foreground">
-              Use lowercase letters, numbers, and underscores only (e.g., custom_math_tutor)
+              Use lowercase letters, numbers, and underscores only. Include &quot;tutor&quot; in the name if this is a tutor prompt.
             </p>
           </div>
 
@@ -153,7 +177,7 @@ export default function PromptFormModal({ isOpen, onClose }: PromptFormModalProp
               defaultChecked
             />
             <Label htmlFor="isActive" className="text-sm font-normal cursor-pointer">
-              Set as active (use this prompt in production)
+              Set as active (only one tutor prompt can be active at a time)
             </Label>
           </div>
 

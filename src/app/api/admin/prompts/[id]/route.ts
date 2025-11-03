@@ -47,6 +47,7 @@ export async function GET(
 /**
  * PUT /api/admin/prompts/[id]
  * Update a system prompt (content and isActive only, version increments)
+ * If activating a tutor prompt, deactivate all other tutor prompts
  */
 export async function PUT(
   request: Request,
@@ -91,6 +92,24 @@ export async function PUT(
       );
     }
 
+    // If activating a tutor prompt, deactivate all other tutor prompts
+    if (isActive && existingPrompt.name.includes('tutor')) {
+      await prisma.systemPrompt.updateMany({
+        where: {
+          name: {
+            contains: 'tutor',
+          },
+          id: {
+            not: id, // Don't deactivate the one we're updating
+          },
+        },
+        data: {
+          isActive: false,
+        },
+      });
+      console.log('🔄 Deactivated other tutor prompts');
+    }
+
     // Update prompt and increment version
     const updatedPrompt = await prisma.systemPrompt.update({
       where: { id },
@@ -102,6 +121,8 @@ export async function PUT(
         },
       },
     });
+
+    console.log(`✅ Updated prompt: ${updatedPrompt.name} (v${updatedPrompt.version}, active: ${updatedPrompt.isActive})`);
 
     return NextResponse.json(updatedPrompt, { status: 200 });
   } catch (error) {

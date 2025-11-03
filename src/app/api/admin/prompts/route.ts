@@ -20,7 +20,7 @@ export async function GET() {
 
     const prompts = await prisma.systemPrompt.findMany({
       orderBy: [
-        { isActive: 'desc' }, // Active prompts first
+        { isActive: 'desc' },
         { createdAt: 'desc' },
       ],
     });
@@ -38,6 +38,7 @@ export async function GET() {
 /**
  * POST /api/admin/prompts
  * Create a new system prompt
+ * If creating an active tutor prompt, deactivate all other tutor prompts
  */
 export async function POST(request: Request) {
   try {
@@ -77,6 +78,21 @@ export async function POST(request: Request) {
       );
     }
 
+    // If creating an active tutor prompt, deactivate all other tutor prompts
+    if (isActive && name.includes('tutor')) {
+      await prisma.systemPrompt.updateMany({
+        where: {
+          name: {
+            contains: 'tutor',
+          },
+        },
+        data: {
+          isActive: false,
+        },
+      });
+      console.log('🔄 Deactivated other tutor prompts');
+    }
+
     // Create new prompt
     const newPrompt = await prisma.systemPrompt.create({
       data: {
@@ -86,6 +102,8 @@ export async function POST(request: Request) {
         version: 1,
       },
     });
+
+    console.log(`✅ Created prompt: ${newPrompt.name} (v${newPrompt.version}, active: ${newPrompt.isActive})`);
 
     return NextResponse.json(newPrompt, { status: 201 });
   } catch (error) {

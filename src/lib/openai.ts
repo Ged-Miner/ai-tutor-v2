@@ -34,30 +34,47 @@ export async function generateAIResponse({
       throw new Error('Lesson not found');
     }
 
-    // Fetch system prompt
+    // Fetch active tutor prompt
+    // Look for any active prompt with 'tutor' in the name, or fall back to any active prompt
     const systemPrompt = await prisma.systemPrompt.findFirst({
       where: {
-        name: 'default_tutor_prompt',
         isActive: true,
+        name: {
+          contains: 'tutor',
+        },
+      },
+      orderBy: {
+        updatedAt: 'desc', // Use most recently updated if multiple exist
       },
     });
 
-    const systemMessage = systemPrompt?.content || 'You are a helpful AI tutor assistant.';
+    // Fallback: if no tutor-specific prompt, use any active prompt
+    const fallbackPrompt = systemPrompt || await prisma.systemPrompt.findFirst({
+      where: {
+        isActive: true,
+      },
+      orderBy: {
+        updatedAt: 'desc',
+      },
+    });
+
+    const systemMessage = fallbackPrompt?.content || 'You are a helpful AI tutor assistant.';
+
+    console.log(`🎯 Using prompt: ${fallbackPrompt?.name || 'default fallback'} (v${fallbackPrompt?.version || 'N/A'})`);
 
     // Build context from lesson
     const lessonContext = `
-# Lesson: ${lesson.title}
+      # Lesson: ${lesson.title}
 
-## Lesson Summary:
-${lesson.summary || 'No summary available.'}
+      ## Lesson Summary:
+      ${lesson.summary || 'No summary available.'}
 
-## Full Transcript:
-${lesson.rawTranscript}
+      ## Full Transcript:
+      ${lesson.rawTranscript}
 
----
-
-Use the above lesson content to answer the student's questions. Base your answers on this material.
-`;
+      ---
+      Use the above lesson content to answer the student's questions. Base your answers on this material.
+      `;
 
     // Build messages array for OpenAI
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
@@ -70,7 +87,7 @@ Use the above lesson content to answer the student's questions. Base your answer
     // Call OpenAI API
     console.log('🤖 Calling OpenAI API...');
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini', // Using GPT-4o-mini for cost efficiency
+      model: 'gpt-4o-mini',
       messages,
       temperature: 0.7,
       max_tokens: 500,
