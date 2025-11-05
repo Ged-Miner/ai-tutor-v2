@@ -1,39 +1,44 @@
-'use client';
-
-import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function AuthErrorPage() {
-  const searchParams = useSearchParams();
-  const error = searchParams.get('error');
+export const dynamic = 'force-dynamic';
 
-  const getErrorMessage = (error: string | null) => {
-    switch (error) {
-      case 'Configuration':
-        return 'There is a problem with the server configuration.';
-      case 'AccessDenied':
-        return 'Access denied. You do not have permission to sign in.';
-      case 'Verification':
-        return 'The verification token has expired or has already been used.';
-      case 'OAuthSignin':
-        return 'Error in constructing an authorization URL.';
-      case 'OAuthCallback':
-        return 'Error in handling the response from the OAuth provider.';
-      case 'OAuthCreateAccount':
-        return 'Could not create OAuth provider user in the database.';
-      case 'EmailCreateAccount':
-        return 'Could not create email provider user in the database.';
-      case 'Callback':
-        return 'Error in the OAuth callback handler route.';
-      case 'OAuthAccountNotLinked':
-        return 'Email already exists with a different provider.';
-      case 'SessionRequired':
-        return 'Please sign in to access this page.';
-      case 'Default':
-      default:
-        return 'An error occurred during authentication.';
-    }
-  };
+interface AuthErrorPageProps {
+  searchParams: Promise<{ error?: string }>;
+}
+
+function getErrorMessage(error: string | null | undefined): string {
+  switch (error) {
+    case 'Configuration':
+      return 'There is a problem with the server configuration.';
+    case 'AccessDenied':
+      return 'Access denied. You do not have permission to sign in.';
+    case 'Verification':
+      return 'The verification token has expired or has already been used.';
+    case 'OAuthSignin':
+      return 'Error in constructing an authorization URL.';
+    case 'OAuthCallback':
+      return 'Error in handling the response from the OAuth provider.';
+    case 'OAuthCreateAccount':
+      return 'Could not create OAuth provider user in the database.';
+    case 'EmailCreateAccount':
+      return 'Could not create email provider user in the database.';
+    case 'Callback':
+      return 'Error in the OAuth callback handler route.';
+    case 'OAuthAccountNotLinked':
+      return 'Email already exists with a different provider.';
+    case 'SessionRequired':
+      return 'Please sign in to access this page.';
+    case 'Default':
+    default:
+      return 'An error occurred during authentication.';
+  }
+}
+
+export default async function AuthErrorPage({
+  searchParams,
+}: AuthErrorPageProps) {
+  const params = await searchParams;
+  const error = params.error || null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-100 flex items-center justify-center p-4">
