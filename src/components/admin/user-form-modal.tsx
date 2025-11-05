@@ -61,6 +61,7 @@ export default function UserFormModal({ isOpen, onClose }: UserFormModalProps) {
       setValue('teacherCode', data.teacherCode);
     } catch (err) {
       setError('Failed to generate teacher code');
+      console.log(err);
     } finally {
       setIsGeneratingCode(false);
     }

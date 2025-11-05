@@ -1,5 +1,5 @@
-import { Course, Enrollment, User } from "@prisma/client";
-
+import { Course, Enrollment} from "@prisma/client";
+// removed User from import
 export type CourseWithCounts = Course & {
   _count: {
     lessons: number;

@@ -43,7 +43,6 @@ export function EditLessonModal({
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [currentSummary, setCurrentSummary] = useState(lesson.summary);
 
   const {
     register,
@@ -97,7 +96,6 @@ export function EditLessonModal({
       if (response.ok) {
         const data = await response.json();
         if (data.summary) {
-          setCurrentSummary(data.summary);
           setValue('summary', data.summary);
         }
         // Refresh the page to update status

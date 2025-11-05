@@ -80,6 +80,7 @@ export function EditCourseModal({ course, onClose }: EditCourseModalProps) {
       setTeachers(teachersList.filter((user: Teacher) => user.teacherCode !== null));
     } catch (err) {
       setError('Failed to load teachers');
+      console.log(err);
     } finally {
       setLoadingTeachers(false);
     }

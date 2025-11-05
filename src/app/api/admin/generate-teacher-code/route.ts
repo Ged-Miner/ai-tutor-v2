@@ -1,12 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { generateTeacherCode } from '@/lib/utils/generate-teacher-code';
-
+// removed NextRequest import which was used in GET()
 /**
  * GET /api/admin/generate-teacher-code
  * Generate a unique teacher code (admin only)
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await auth();
 

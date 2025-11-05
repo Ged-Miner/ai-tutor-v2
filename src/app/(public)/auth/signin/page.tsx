@@ -8,7 +8,7 @@ export default function SignInPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
   const handleCredentialsSignIn = async (e: React.FormEvent) => {
@@ -24,15 +24,12 @@ export default function SignInPage() {
       });
 
       if (result?.error) {
-        setError('Invalid email or password');
+        setError(result.error);
       } else {
         router.push('/dashboard');
-        router.refresh();
       }
-    } catch (error) {
-      setError('An error occurred. Please try again.');
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      setError(`An unexpected error occurred: ${err}`);
     }
   };
 
