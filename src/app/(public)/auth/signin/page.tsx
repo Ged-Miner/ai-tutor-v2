@@ -39,7 +39,7 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -141,9 +141,9 @@ export default function SignInPage() {
         <div className="mt-8 p-4 bg-blue-50 rounded-lg">
           <p className="text-xs font-semibold text-blue-900 mb-2">Demo Accounts:</p>
           <div className="space-y-1 text-xs text-blue-800">
-            <p>Admin: admin@aitutor.com / admin123</p>
-            <p>Teacher: john.smith@university.edu / teacher123</p>
-            <p>Student: alice@student.edu / student123</p>
+            <p>Admin: admin@aitutor.com</p>
+            <p>Teacher: john.smith@university.edu</p>
+            <p>Student: alice@student.edu</p>
           </div>
         </div>
       </div>
