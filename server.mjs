@@ -142,7 +142,7 @@ app.prepare().then(() => {
           }));
 
           // Call API route to generate AI response
-          const apiUrl = `http://localhost:${port}/api/chat/generate-response`;
+          const apiUrl = `${process.env.NEXTAUTH_URL || `http://localhost:${port}`}/api/chat/generate-response`;
           const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
