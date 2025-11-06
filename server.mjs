@@ -6,7 +6,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 const dev = process.env.NODE_ENV !== 'production';
-const hostname = 'localhost';
+const hostname = '0.0.0.0'; // changed from 'localhost'
 const port = parseInt(process.env.PORT || '3000', 10);
 
 // Create Next.js app
@@ -201,7 +201,7 @@ app.prepare().then(() => {
   });
 
   // Start server
-  httpServer.listen(port, (err) => {
+  httpServer.listen(port, '0.0.0.0', (err) => {
     if (err) throw err;
     console.log(`
 🚀 Server ready!
