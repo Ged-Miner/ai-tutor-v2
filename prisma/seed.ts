@@ -20,50 +20,52 @@ async function main() {
 
   // Create Admin User
   console.log('👤 Creating admin user...');
-  const adminPassword = await bcrypt.hash('admin123', 10);
+  const adminPassword = await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD || 'admin123', 10);
   const admin = await prisma.user.create({
     data: {
       email: 'admin@aitutor.com',
       name: 'Admin User',
       role: Role.ADMIN,
-      password: adminPassword,  // Add this line
+      password: adminPassword,
     },
   });
 
+  console.log(`${admin} created.`)
+
   // Create Teacher Users
   console.log('👨‍🏫 Creating teacher users...');
-  const teacher1Password = await bcrypt.hash('teacher123', 10);
+  const teacher1Password = await bcrypt.hash(process.env.SEED_TEACHER_PASSWORD || 'teacher123', 10);
   const teacher1 = await prisma.user.create({
     data: {
       email: 'john.smith@university.edu',
       name: 'Prof. John Smith',
       role: Role.TEACHER,
       teacherCode: 'TEACH001',
-      password: teacher1Password,  // Add this line
+      password: teacher1Password,
     },
   });
 
-  const teacher2Password = await bcrypt.hash('teacher123', 10);  // Add this variable
+  const teacher2Password = await bcrypt.hash(process.env.SEED_TEACHER_PASSWORD || 'teacher123', 10);
   const teacher2 = await prisma.user.create({
     data: {
       email: 'sarah.jones@university.edu',
       name: 'Dr. Sarah Jones',
       role: Role.TEACHER,
       teacherCode: 'TEACH002',
-      password: teacher2Password,  // Add this line
+      password: teacher2Password,
     },
   });
 
   // Create Student Users
   console.log('👨‍🎓 Creating student users...');
-  const studentPassword = await bcrypt.hash('student123', 10);
+  const studentPassword = await bcrypt.hash(process.env.SEED_STUDENT_PASSWORD || 'student123', 10);
   const students = await Promise.all([
     prisma.user.create({
       data: {
         email: 'alice@student.edu',
         name: 'Alice Chen',
         role: Role.STUDENT,
-        password: studentPassword,  // Add this line
+        password: studentPassword,
       },
     }),
     prisma.user.create({
@@ -71,7 +73,7 @@ async function main() {
         email: 'bob@student.edu',
         name: 'Bob Wilson',
         role: Role.STUDENT,
-        password: studentPassword,  // Add this line
+        password: studentPassword,
       },
     }),
     prisma.user.create({
@@ -79,7 +81,7 @@ async function main() {
         email: 'charlie@student.edu',
         name: 'Charlie Brown',
         role: Role.STUDENT,
-        password: studentPassword,  // Add this line
+        password: studentPassword,
       },
     }),
   ]);
@@ -243,6 +245,7 @@ else:
     },
   });
 
+  console.log(`${lesson2} created.`)
   const lesson3 = await prisma.lesson.create({
     data: {
       courseId: course3.id,
