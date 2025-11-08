@@ -11,7 +11,7 @@ export default async function Home() {
           AI Tutor 2.0
         </h1>
         <p className="text-lg text-gray-600 mb-8">
-          Building the future of educational AI assistance
+          Your AI study partner and teaching assistant
         </p>
         {session ? (
           <Link
