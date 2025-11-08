@@ -12,8 +12,33 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card } from '@/components/ui/card';
+import { CheckCircle2, HelpCircle } from 'lucide-react';
 import { ProcessTranscriptModal } from './process-transcript-modal';
 import type { PendingTranscript } from '@/types/transcript';
+
+function CourseInfo({
+  courseName,
+  suggestedCourse,
+}: {
+  courseName: string;
+  suggestedCourse: { name: string } | null;
+}) {
+  if (suggestedCourse) {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-sm">
+        <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+        <span className="text-foreground">{suggestedCourse.name}</span>
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 text-sm">
+      <HelpCircle className="h-4 w-4 text-muted-foreground shrink-0" />
+      <span className="text-muted-foreground">{courseName}</span>
+    </span>
+  );
+}
 
 export function PendingTranscriptsTable() {
   const router = useRouter();
@@ -87,14 +112,14 @@ export function PendingTranscriptsTable() {
 
   return (
     <>
-      <div className="rounded-md border">
+      {/* Desktop Table */}
+      <Card className="hidden md:block">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Lesson Title</TableHead>
-              <TableHead>Course Name</TableHead>
-              <TableHead>Captured</TableHead>
-              <TableHead>Suggested Course</TableHead>
+              <TableHead>Course</TableHead>
+              <TableHead className="hidden lg:table-cell">Captured</TableHead>
               <TableHead>Preview</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -105,20 +130,16 @@ export function PendingTranscriptsTable() {
                 <TableCell className="font-medium">
                   {transcript.lessonTitle}
                 </TableCell>
-                <TableCell>{transcript.courseName}</TableCell>
                 <TableCell>
+                  <CourseInfo
+                    courseName={transcript.courseName}
+                    suggestedCourse={transcript.suggestedCourse}
+                  />
+                </TableCell>
+                <TableCell className="hidden lg:table-cell">
                   {new Date(transcript.capturedAt).toLocaleDateString()}
                 </TableCell>
-                <TableCell>
-                  {transcript.suggestedCourse ? (
-                    <span className="text-green-600">
-                      ✓ {transcript.suggestedCourse.name}
-                    </span>
-                  ) : (
-                    <span className="text-muted-foreground">No match</span>
-                  )}
-                </TableCell>
-                <TableCell className="max-w-xs truncate text-muted-foreground">
+                <TableCell className="max-w-3xs truncate text-muted-foreground">
                   {transcript.rawTranscript.substring(0, 100)}...
                 </TableCell>
                 <TableCell className="text-right">
@@ -133,6 +154,45 @@ export function PendingTranscriptsTable() {
             ))}
           </TableBody>
         </Table>
+      </Card>
+
+      {/* Mobile Card Layout */}
+      <div className="md:hidden space-y-3">
+        {transcripts.map((transcript) => (
+          <Card key={transcript.id} className="p-4">
+            <div className="space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium truncate">{transcript.lessonTitle}</h3>
+                  <div className="flex flex-col gap-2 mt-2">
+                    <div>
+                      <span className="text-xs font-medium text-muted-foreground">Course</span>
+                      <div className="mt-1">
+                        <CourseInfo
+                          courseName={transcript.courseName}
+                          suggestedCourse={transcript.suggestedCourse}
+                        />
+                      </div>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      <span className="text-xs font-medium">Captured:</span> {new Date(transcript.capturedAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => setSelectedTranscript(transcript)}
+                  className="shrink-0"
+                >
+                  Create Lesson
+                </Button>
+              </div>
+              <div className="text-sm text-muted-foreground line-clamp-2 border-t pt-2">
+                {transcript.rawTranscript}
+              </div>
+            </div>
+          </Card>
+        ))}
       </div>
 
       {selectedTranscript && (

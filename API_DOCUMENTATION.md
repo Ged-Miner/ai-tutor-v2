@@ -3,7 +3,7 @@
 ## Base URL
 
 - **Development**: `http://localhost:3000`
-- **Production**: `[Your production URL will go here]`
+- **Production**: `https://ai-tutor-v2-production.up.railway.app/`
 
 ---
 
