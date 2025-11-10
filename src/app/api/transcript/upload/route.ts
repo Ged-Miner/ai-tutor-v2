@@ -5,27 +5,19 @@ import { uploadTranscriptSchema } from '@/lib/validations/transcript';
 import { applyRateLimit, transcriptUploadLimiter } from '@/lib/rate-limit';
 
 /**
- * CORS headers for Chrome extension
+ * CORS headers for transcript uploads
+ * Allows requests from any source since the endpoint validates:
+ * - teacherCode through database lookup
+ * - Data structure through Zod schema validation
+ * - Request rate limiting
  */
 function getCorsHeaders(origin: string | null): Record<string, string> {
-  const allowedOrigins = [
-    process.env.NEXTAUTH_URL || 'http://localhost:3000',
-  ];
-
-  // Allow chrome-extension:// origins
-  const isChromeExtension = origin?.startsWith('chrome-extension://');
-  const isAllowedOrigin = origin && allowedOrigins.includes(origin);
-
-  if (isChromeExtension || isAllowedOrigin) {
-    return {
-      'Access-Control-Allow-Origin': origin || '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Allow-Credentials': 'true',
-    };
-  }
-
-  return {};
+  return {
+    'Access-Control-Allow-Origin': origin || '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Credentials': 'true',
+  };
 }
 
 /**
@@ -42,7 +34,7 @@ export async function OPTIONS(request: Request) {
 
 /**
  * POST /api/transcript/upload
- * Receive transcript uploads from Chrome extension
+ * Receive transcript uploads from any source (Chrome extension, web app, CLI tool, etc.)
  * Public endpoint (no auth) but validates teacherCode and applies rate limiting
  */
 export async function POST(request: Request) {
