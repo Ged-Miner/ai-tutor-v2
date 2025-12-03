@@ -1,6 +1,6 @@
 # AI Tutor 2.0
 
-An educational web application that integrates with Chrome extension to automatically create AI-powered lesson chat rooms from live classroom transcripts.
+An educational web application that receives incoming class transcripts, generates lesson summaries, and facilitates AI-powered chat partners for students to receive guidance specifically about their courses.
 
 ## Tech Stack
 
