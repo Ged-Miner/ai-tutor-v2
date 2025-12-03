@@ -1,19 +1,30 @@
 'use client';
 
 import { signIn } from 'next-auth/react';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function SignInPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string>('');
+  const [success, setSuccess] = useState<string>('');
   const [loading, setLoading] = useState(false);
+
+  // Check for registration success
+  useEffect(() => {
+    if (searchParams.get('registered') === 'true') {
+      setSuccess('Account created successfully! Please sign in with your credentials.');
+    }
+  }, [searchParams]);
 
   const handleCredentialsSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess(''); // Clear success message on new login attempt
     setLoading(true);
 
     try {
@@ -25,16 +36,20 @@ export default function SignInPage() {
 
       if (result?.error) {
         setError(result.error);
+        setLoading(false);
       } else {
         router.push('/dashboard');
       }
     } catch (err) {
       setError(`An unexpected error occurred: ${err}`);
+      setLoading(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
+    setError('');
+    setSuccess('');
     await signIn('google', { callbackUrl: '/dashboard' });
   };
 
@@ -48,10 +63,20 @@ export default function SignInPage() {
           <p className="text-gray-600">Sign in to your account</p>
         </div>
 
+        {/* Success Message */}
+        {success && (
+          <Alert className="mb-4 bg-green-50 border-green-200">
+            <AlertDescription className="text-green-800">
+              {success}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Error Message */}
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-            {error}
-          </div>
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         )}
 
         <form onSubmit={handleCredentialsSignIn} className="space-y-4">
