@@ -38,6 +38,19 @@ export default function UsersTable({ users }: UsersTableProps) {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [deletingUser, setDeletingUser] = useState<User | null>(null);
 
+  const getRoleBackgroundColor = (role: 'ADMIN' | 'TEACHER' | 'STUDENT') => {
+    switch (role) {
+      case 'STUDENT':
+        return 'bg-red-50';
+      case 'TEACHER':
+        return 'bg-blue-50';
+      case 'ADMIN':
+        return 'bg-green-50';
+      default:
+        return '';
+    }
+  };
+
   return (
     <>
       {/* Desktop Table */}
@@ -46,6 +59,7 @@ export default function UsersTable({ users }: UsersTableProps) {
           <TableHeader>
             <TableRow>
               <TableHead>User</TableHead>
+              <TableHead>Role</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -64,7 +78,7 @@ export default function UsersTable({ users }: UsersTableProps) {
               </TableRow>
             ) : (
               users.map((user) => (
-                <TableRow key={user.id}>
+                <TableRow key={user.id} className={getRoleBackgroundColor(user.role)}>
                   <TableCell>
                     <div className="flex items-center gap-3">
                       {/* <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600">
@@ -77,6 +91,9 @@ export default function UsersTable({ users }: UsersTableProps) {
                         <div className="text-sm text-muted-foreground">{user.email}</div>
                       </div>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    {user.role.toLowerCase()}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
@@ -119,7 +136,7 @@ export default function UsersTable({ users }: UsersTableProps) {
           </Card>
         ) : (
           users.map((user) => (
-            <Card key={user.id} className="p-4">
+            <Card key={user.id} className={`p-4 ${getRoleBackgroundColor(user.role)}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   {/* <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600">
@@ -131,6 +148,9 @@ export default function UsersTable({ users }: UsersTableProps) {
                     <div className="font-medium truncate">{user.name}</div>
                     <div className="text-sm text-muted-foreground truncate">{user.email}</div>
                   </div>
+                </div>
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  {user.role.toLowerCase()}
                 </div>
                 <div className="flex gap-1 ml-2">
                   <Button

@@ -2,8 +2,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
-import { LessonSummary } from '@/components/student/lesson-summary';
-import { ChatInterface } from '@/components/student/chat-interface';
+import { LessonLayout } from '@/components/student/lesson-layout';
 
 interface PageProps {
   params: Promise<{
@@ -82,7 +81,7 @@ export default async function StudentLessonPage({ params }: PageProps) {
   }
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-full -m-4 sm:-m-6 lg:-m-8">
       {/* Header */}
       <div className="border-b bg-background px-6 py-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
@@ -105,35 +104,14 @@ export default async function StudentLessonPage({ params }: PageProps) {
         <h1 className="text-2xl font-bold">{lesson.title}</h1>
       </div>
 
-      {/* Two-Panel Layout */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Panel - Lesson Summary */}
-        <div className="w-1/2 border-r overflow-y-auto">
-          <div className="p-6">
-            <LessonSummary
-              title={lesson.title}
-              summary={lesson.summary}
-            />
-          </div>
-        </div>
-
-        {/* Right Panel - Chat Interface */}
-        <div className="w-1/2 flex flex-col bg-muted/30">
-          <div className="border-b bg-background px-6 py-3">
-            <h2 className="font-semibold">AI Tutor</h2>
-            <p className="text-xs text-muted-foreground">
-              Ask questions about this lesson
-            </p>
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <ChatInterface
-              lessonId={lesson.id}
-              studentId={session.user.id}  // ADD THIS LINE
-              initialMessages={chatSession.messages}
-            />
-          </div>
-        </div>
-      </div>
+      {/* Responsive Layout - Tabs on mobile, two-panel on desktop */}
+      <LessonLayout
+        lessonId={lesson.id}
+        studentId={session.user.id}
+        lessonTitle={lesson.title}
+        lessonSummary={lesson.summary}
+        initialMessages={chatSession.messages}
+      />
     </div>
   );
 }
