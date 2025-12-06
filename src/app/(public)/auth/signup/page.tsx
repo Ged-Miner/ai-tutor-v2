@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { signIn } from 'next-auth/react';
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -156,15 +157,12 @@ export default function SignUpPage() {
           </div>
         </div>
 
-        {/* Google OAuth Button - We'll implement this in Phase 2 */}
+        {/* Google OAuth Button */}
         <Button
           type="button"
           variant="outline"
           className="w-full"
-          onClick={() => {
-            // TODO: Implement Google OAuth signup
-            alert('Google OAuth signup coming in Phase 2!');
-          }}
+          onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
         >
           <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
             <path

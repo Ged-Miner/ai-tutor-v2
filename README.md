@@ -495,3 +495,12 @@ ai-tutor-v2
 └─ tsconfig.json
 
 ```
+
+# Notes about dependency pinning issues:
+{
+  "dependencies": {
+    "next-auth": "5.0.0-beta.29", // Pinned: Version conflict with @auth/prisma-adapter
+    "@auth/prisma-adapter": "2.4.2", // Pinned: Compatible with next-auth beta.29
+    "@auth/core": "0.40.0" // Pinned: Explicit override to resolve type conflicts
+  }
+}

@@ -1,12 +1,14 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { Role } from "@prisma/client";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  trustHost: true, // Added for Railway
+  trustHost: true,
+  adapter: PrismaAdapter(prisma),
   session: {
     strategy: "jwt",
   },
@@ -16,8 +18,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   providers: [
     Google({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      clientId: process.env.NEXTAUTH_GOOGLE_ID!,
+      clientSecret: process.env.NEXTAUTH_GOOGLE_SECRET!,
     }),
     Credentials({
       name: "credentials",
@@ -60,12 +62,46 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user, trigger, session }) {
+    async signIn({ user, account }) {
+
+      // For OAuth providers (Google), ensure user has STUDENT role
+      if (account?.provider === "google") {
+        // Check if this is a new user (user was just created by adapter)
+        const existingUser = await prisma.user.findUnique({
+          where: { email: user.email! },
+        });
+
+        // If user exists but has no role set, update to STUDENT
+        if (existingUser && !existingUser.role) {
+          await prisma.user.update({
+            where: { id: existingUser.id },
+            data: { role: "STUDENT" },
+          });
+        }
+      }
+      return true;
+    },
+    async jwt({ token, user, trigger, session, account }) {
       // Initial sign in
       if (user) {
         token.id = user.id;
-        token.role = user.role;
-        token.teacherCode = user.teacherCode;
+
+        // For OAuth users, fetch role from database
+        if (account?.provider === "google") {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: user.id },
+            select: { role: true, teacherCode: true },
+          });
+
+          if (dbUser) {
+            token.role = dbUser.role;
+            token.teacherCode = dbUser.teacherCode;
+          }
+        } else {
+          // For credentials users, role comes from authorize function
+          token.role = user.role;
+          token.teacherCode = user.teacherCode;
+        }
       }
 
       // Update token if session is updated
