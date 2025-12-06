@@ -43,11 +43,11 @@ export async function POST(req: Request) {
       },
     });
 
-    // TODO: Send verification email (we'll add this in Phase 3)
+    // Email verification will be added when domain is configured
 
     return NextResponse.json(
       {
-        message: 'Account created successfully! Please check your email to verify your account.',
+        message: 'Account created successfully! You can now sign in.',
         user,
       },
       { status: 201 }
