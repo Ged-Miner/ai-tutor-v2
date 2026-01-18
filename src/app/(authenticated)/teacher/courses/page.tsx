@@ -19,7 +19,12 @@ export default async function TeacherCoursesPage() {
     where: {
       teacherId: session.user.id,
     },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      courseCode: true,
+      createdAt: true,
       _count: {
         select: {
           lessons: true,

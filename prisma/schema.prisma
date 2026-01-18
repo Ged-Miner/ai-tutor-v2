@@ -15,7 +15,6 @@ model User {
   emailVerified DateTime?
   image         String?
   role          Role      @default(STUDENT)
-  teacherCode   String?   @unique
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   accounts      Account[]
@@ -72,6 +71,7 @@ model VerificationToken {
 model Course {
   id          String    @id @default(cuid())
   teacherId   String
+  courseCode  String    @unique
   name        String
   description String?
   settings    Json?
@@ -83,6 +83,7 @@ model Course {
   enrollments Enrollment[]
 
   @@index([teacherId])
+  @@index([courseCode])
   @@map("courses")
 }
 
@@ -161,7 +162,7 @@ enum MessageRole {
 model PendingTranscript {
   id              String   @id @default(cuid())
   teacherId       String
-  teacherCode     String
+  courseCode      String
   courseName      String
   lessonTitle     String
   rawTranscript   String   @db.Text
@@ -173,7 +174,7 @@ model PendingTranscript {
   teacher         User     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
   @@index([teacherId])
-  @@index([teacherCode])
+  @@index([courseCode])
   @@index([processed])
   @@map("pending_transcripts")
 }

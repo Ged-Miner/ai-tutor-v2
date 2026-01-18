@@ -1,5 +1,6 @@
 import { PrismaClient, Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { generateCourseCode } from '../src/lib/utils/generate-course-code';
 
 const prisma = new PrismaClient();
 
@@ -40,7 +41,6 @@ async function main() {
       email: 'john.smith@university.edu',
       name: 'Prof. John Smith',
       role: Role.TEACHER,
-      teacherCode: 'TEACH001',
       password: teacher1Password,
     },
   });
@@ -51,7 +51,6 @@ async function main() {
       email: 'sarah.jones@university.edu',
       name: 'Dr. Sarah Jones',
       role: Role.TEACHER,
-      teacherCode: 'TEACH002',
       password: teacher2Password,
     },
   });
@@ -91,6 +90,7 @@ async function main() {
   const course1 = await prisma.course.create({
     data: {
       teacherId: teacher1.id,
+      courseCode: await generateCourseCode(),
       name: 'Introduction to Computer Science',
       description: 'Fundamentals of programming and computer science concepts',
       settings: {
@@ -103,6 +103,7 @@ async function main() {
   const course2 = await prisma.course.create({
     data: {
       teacherId: teacher1.id,
+      courseCode: await generateCourseCode(),
       name: 'Data Structures and Algorithms',
       description: 'Advanced data structures and algorithmic problem solving',
       settings: {
@@ -115,6 +116,7 @@ async function main() {
   const course3 = await prisma.course.create({
     data: {
       teacherId: teacher2.id,
+      courseCode: await generateCourseCode(),
       name: 'Web Development Fundamentals',
       description: 'HTML, CSS, JavaScript and modern web frameworks',
       settings: {

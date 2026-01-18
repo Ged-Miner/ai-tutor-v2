@@ -126,9 +126,9 @@ export const transcriptUploadLimiter: RateLimiterConfig = {
   windowMs: 15 * 60 * 1000,
   maxRequests: 10,
   keyGenerator: (body: Record<string, unknown>) => {
-    const teacherCode = body.teacherCode;
-    if (typeof teacherCode === 'string') {
-      return `transcript:${teacherCode}`;
+    const courseCode = body.courseCode;
+    if (typeof courseCode === 'string') {
+      return `transcript:${courseCode}`;
     }
     return 'transcript:unknown';
   },

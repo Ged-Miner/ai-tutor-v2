@@ -15,7 +15,12 @@ export default async function AdminCoursesPage() {
 
   // Fetch ALL courses with teacher info and counts
   const courses = await prisma.course.findMany({
-    include: {
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      courseCode: true,
+      createdAt: true,
       teacher: {
         select: {
           id: true,

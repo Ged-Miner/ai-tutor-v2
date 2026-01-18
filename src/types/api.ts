@@ -7,15 +7,16 @@
 export interface EnrolledCourse {
   id: string;
   name: string;
+  teacher?: string;
+  lessonCount?: number;
 }
 
 // Enrollment API response
 export interface EnrollmentResponse {
   success: boolean;
-  enrolled: number;
-  courses: EnrolledCourse[];
   message: string;
   alreadyEnrolled?: boolean;
+  course: EnrolledCourse;
 }
 
 // Error response from API

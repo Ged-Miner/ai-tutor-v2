@@ -24,7 +24,6 @@ interface Teacher {
   id: string;
   name: string | null;
   email: string;
-  teacherCode: string | null;
 }
 
 interface CourseFormModalProps {
@@ -65,7 +64,7 @@ export function CourseFormModal({ open, onClose }: CourseFormModalProps) {
       const data = await response.json();
       // API returns { users: [...] }, so we need to access data.users
       const teachersList = data.users || [];
-      setTeachers(teachersList.filter((user: Teacher) => user.teacherCode !== null));
+      setTeachers(teachersList);
     } catch (err) {
       setError('Failed to load teachers');
       console.log(err);
@@ -142,7 +141,7 @@ export function CourseFormModal({ open, onClose }: CourseFormModalProps) {
                 <option value="">Select a teacher...</option>
                 {teachers.map((teacher) => (
                   <option key={teacher.id} value={teacher.id}>
-                    {teacher.name || teacher.email} ({teacher.teacherCode})
+                    {teacher.name || teacher.email}
                   </option>
                 ))}
               </select>

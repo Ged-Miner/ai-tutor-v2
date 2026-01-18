@@ -1,13 +1,14 @@
 import { z } from 'zod';
 
 /**
- * Schema for student enrollment via teacher code
+ * Schema for student enrollment via course code
  */
 export const enrollmentSchema = z.object({
-  teacherCode: z
+  courseCode: z
     .string()
-    .min(1, 'Teacher code is required')
-    .regex(/^TEACH\d{3}$/, 'Invalid teacher code format. Should be TEACH###')
+    .min(1, 'Course code is required')
+    .length(7, 'Course code must be exactly 7 characters')
+    .regex(/^[A-Z0-9]{7}$/, 'Invalid course code format. Must be 7 uppercase letters/numbers')
     .toUpperCase(),
 });
 

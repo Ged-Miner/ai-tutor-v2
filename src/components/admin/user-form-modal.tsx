@@ -28,13 +28,10 @@ export default function UserFormModal({ isOpen, onClose }: UserFormModalProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isGeneratingCode, setIsGeneratingCode] = useState(false);
 
   const {
     register,
     handleSubmit,
-    watch,
-    setValue,
     reset,
     formState: { errors },
   } = useForm<CreateUserInput>({
@@ -44,28 +41,8 @@ export default function UserFormModal({ isOpen, onClose }: UserFormModalProps) {
       name: '',
       password: '',
       role: 'STUDENT',
-      teacherCode: null,
     },
   });
-
-  const selectedRole = watch('role');
-
-  // Generate teacher code
-  const handleGenerateCode = async () => {
-    setIsGeneratingCode(true);
-    try {
-      const response = await fetch('/api/admin/generate-teacher-code');
-      if (!response.ok) throw new Error('Failed to generate code');
-
-      const data = await response.json();
-      setValue('teacherCode', data.teacherCode);
-    } catch (err) {
-      setError('Failed to generate teacher code');
-      console.log(err);
-    } finally {
-      setIsGeneratingCode(false);
-    }
-  };
 
   // Handle form submission
   const onSubmit = async (data: CreateUserInput) => {
@@ -186,35 +163,6 @@ export default function UserFormModal({ isOpen, onClose }: UserFormModalProps) {
               <p className="text-sm text-destructive">{errors.role.message}</p>
             )}
           </div>
-
-          {/* Teacher Code Field (conditional) */}
-          {selectedRole === 'TEACHER' && (
-            <div className="space-y-2">
-              <Label htmlFor="teacherCode">Teacher Code *</Label>
-              <div className="flex gap-2">
-                <Input
-                  {...register('teacherCode')}
-                  id="teacherCode"
-                  placeholder="TEACH001"
-                  className={errors.teacherCode ? 'border-destructive' : ''}
-                />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={handleGenerateCode}
-                  disabled={isGeneratingCode}
-                >
-                  {isGeneratingCode ? 'Generating...' : 'Generate'}
-                </Button>
-              </div>
-              {errors.teacherCode && (
-                <p className="text-sm text-destructive">{errors.teacherCode.message}</p>
-              )}
-              <p className="text-xs text-muted-foreground">
-                Format: TEACH### (e.g., TEACH001)
-              </p>
-            </div>
-          )}
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleClose}>

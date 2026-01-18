@@ -65,10 +65,9 @@ export function EnrollmentForm() {
         return;
       }
 
-      // Success - show courses enrolled (now properly typed!)
-      const courseNames = result.courses.map(course => course.name).join(', ');
+      // Success - show course enrolled
       setSuccess(
-        `✅ ${result.message}\n\nCourses: ${courseNames}`
+        `✅ ${result.message}\n\nCourse: ${result.course.name}\nTeacher: ${result.course.teacher || 'N/A'}`
       );
       reset();
 
@@ -86,28 +85,28 @@ export function EnrollmentForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Enter Teacher Code</CardTitle>
+        <CardTitle>Enter Course Code</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Teacher Code Input */}
+          {/* Course Code Input */}
           <div className="space-y-2">
-            <Label htmlFor="teacherCode">
-              Teacher Code <span className="text-red-500">*</span>
+            <Label htmlFor="courseCode">
+              Course Code <span className="text-red-500">*</span>
             </Label>
             <Input
-              id="teacherCode"
-              {...register('teacherCode')}
-              placeholder="TEACH001"
+              id="courseCode"
+              {...register('courseCode')}
+              placeholder="A3X9K2M"
               className="text-center text-lg font-mono uppercase tracking-wider"
-              maxLength={8}
+              maxLength={7}
             />
             <p className="text-xs text-muted-foreground">
-              Format: TEACH followed by 3 digits (e.g., TEACH001)
+              Format: 7 uppercase letters and numbers (e.g., A3X9K2M)
             </p>
-            {errors.teacherCode && (
+            {errors.courseCode && (
               <p className="text-sm text-red-600">
-                {errors.teacherCode.message}
+                {errors.courseCode.message}
               </p>
             )}
           </div>

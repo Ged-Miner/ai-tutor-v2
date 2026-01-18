@@ -20,6 +20,7 @@ interface Course {
   id: string;
   name: string;
   description: string | null;
+  courseCode: string;
   createdAt: Date;
   teacher: {
     id: string;
@@ -48,6 +49,7 @@ export function CoursesTable({ courses }: CoursesTableProps) {
           <TableHeader>
             <TableRow>
               <TableHead>Course Name</TableHead>
+              <TableHead>Course Code</TableHead>
               <TableHead className="hidden lg:table-cell">Teacher</TableHead>
               <TableHead>Lessons</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -57,6 +59,11 @@ export function CoursesTable({ courses }: CoursesTableProps) {
             {courses.map((course) => (
               <TableRow key={course.id}>
                 <TableCell className="font-medium">{course.name}</TableCell>
+                <TableCell>
+                  <code className="rounded bg-gray-100 px-2 py-1 text-sm font-mono text-gray-900">
+                    {course.courseCode}
+                  </code>
+                </TableCell>
                 <TableCell className="hidden lg:table-cell">
                   <div className="flex flex-col">
                     <span className="text-sm">{course.teacher.name || 'No name'}</span>
@@ -102,6 +109,11 @@ export function CoursesTable({ courses }: CoursesTableProps) {
             <div className="space-y-3">
               <div>
                 <h3 className="font-medium">{course.name}</h3>
+                <div className="mt-1">
+                  <code className="rounded bg-gray-100 px-2 py-1 text-xs font-mono text-gray-900">
+                    {course.courseCode}
+                  </code>
+                </div>
                 <p className="text-sm text-muted-foreground mt-1">
                   {course.teacher.name || 'No name'}
                 </p>

@@ -29,7 +29,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null;
+          throw new Error("Email and password are required");
         }
 
         const user = await prisma.user.findUnique({
@@ -38,8 +38,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           },
         });
 
-        if (!user || !user.password) {
-          return null;
+        if (!user) {
+          throw new Error("No account found with this email address");
+        }
+
+        if (!user.password) {
+          throw new Error("This account uses a different sign-in method. Please try signing in with Google.");
         }
 
         const passwordMatch = await bcrypt.compare(
@@ -48,7 +52,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         );
 
         if (!passwordMatch) {
-          return null;
+          throw new Error("Incorrect password");
         }
 
         return {
@@ -56,7 +60,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: user.email,
           name: user.name,
           role: user.role,
-          teacherCode: user.teacherCode,
         };
       },
     }),
@@ -90,17 +93,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (account?.provider === "google") {
           const dbUser = await prisma.user.findUnique({
             where: { id: user.id },
-            select: { role: true, teacherCode: true },
+            select: { role: true },
           });
 
           if (dbUser) {
             token.role = dbUser.role;
-            token.teacherCode = dbUser.teacherCode;
           }
         } else {
           // For credentials users, role comes from authorize function
           token.role = user.role;
-          token.teacherCode = user.teacherCode;
         }
       }
 
@@ -115,7 +116,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as Role;
-        session.user.teacherCode = token.teacherCode as string | null;
       }
       return session;
     },

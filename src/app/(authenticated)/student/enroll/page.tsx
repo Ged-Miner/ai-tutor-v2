@@ -17,7 +17,7 @@ export default async function StudentEnrollPage() {
           Enroll in a Course
         </h1>
         <p className="mt-2 text-gray-600">
-          Enter your teacher&apos;s code to access their courses
+          Enter a course code to enroll
         </p>
       </div>
 
@@ -27,9 +27,9 @@ export default async function StudentEnrollPage() {
           How to Enroll:
         </h2>
         <ol className="mt-3 space-y-2 text-sm text-blue-800">
-          <li>1. Get a teacher code from your instructor (format: TEACH###)</li>
+          <li>1. Get a course code from your instructor (7-character code)</li>
           <li>2. Enter the code below</li>
-          <li>3. You&apos;ll be enrolled in all of that teacher&apos;s courses</li>
+          <li>3. You&apos;ll be enrolled in that specific course</li>
           <li>4. Start learning!</li>
         </ol>
       </div>
@@ -40,9 +40,9 @@ export default async function StudentEnrollPage() {
       {/* Help Text */}
       <div className="rounded-lg border bg-gray-50 p-4 text-center">
         <p className="text-sm text-gray-600">
-          Don&apos;t have a teacher code?{' '}
-          <span className="font-medium">Ask your instructor</span> for their
-          unique code.
+          Don&apos;t have a course code?{' '}
+          <span className="font-medium">Ask your instructor</span> for the
+          unique code for their course.
         </p>
       </div>
     </div>

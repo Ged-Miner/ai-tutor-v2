@@ -19,12 +19,6 @@ export const createUserSchema = z.object({
   role: z.enum(['ADMIN', 'TEACHER', 'STUDENT'], {
     errorMap: () => ({ message: 'Role must be ADMIN, TEACHER, or STUDENT' }),
   }),
-  teacherCode: z
-    .string()
-    .length(8, 'Teacher code must be exactly 8 characters')
-    .regex(/^TEACH\d{3}$/, 'Teacher code must follow format: TEACHxxx')
-    .optional()
-    .nullable(),
 });
 
 /**
@@ -50,12 +44,6 @@ export const updateUserSchema = z.object({
   role: z
     .enum(['ADMIN', 'TEACHER', 'STUDENT'])
     .optional(),
-  teacherCode: z
-    .string()
-    .length(8, 'Teacher code must be exactly 8 characters')
-    .regex(/^TEACH\d{3}$/, 'Teacher code must follow format: TEACHxxx')
-    .optional()
-    .nullable(),
 }).transform((data) => {
   // Transform empty password to undefined (no change)
   if (data.password === '') {

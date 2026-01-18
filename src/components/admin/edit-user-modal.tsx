@@ -25,7 +25,6 @@ interface User {
   email: string;
   name: string | null;
   role: 'ADMIN' | 'TEACHER' | 'STUDENT';
-  teacherCode: string | null;
 }
 
 interface EditUserModalProps {
@@ -38,20 +37,15 @@ export default function EditUserModal({ isOpen, onClose, user }: EditUserModalPr
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isGeneratingCode, setIsGeneratingCode] = useState(false);
 
   const {
     register,
     handleSubmit,
-    watch,
-    setValue,
     reset,
     formState: { errors },
   } = useForm<UpdateUserInput>({
     resolver: zodResolver(updateUserSchema),
   });
-
-  const selectedRole = watch('role');
 
   // Reset form when user changes or modal opens
   useEffect(() => {
@@ -60,28 +54,10 @@ export default function EditUserModal({ isOpen, onClose, user }: EditUserModalPr
         email: user.email,
         name: user.name || '',
         role: user.role,
-        teacherCode: user.teacherCode,
         password: '', // Don't pre-fill password
       });
     }
   }, [user, isOpen, reset]);
-
-  // Generate teacher code
-  const handleGenerateCode = async () => {
-    setIsGeneratingCode(true);
-    try {
-      const response = await fetch('/api/admin/generate-teacher-code');
-      if (!response.ok) throw new Error('Failed to generate code');
-
-      const data = await response.json();
-      setValue('teacherCode', data.teacherCode);
-    } catch (err) {
-      setError('Failed to generate teacher code');
-      console.log(err);
-    } finally {
-      setIsGeneratingCode(false);
-    }
-  };
 
   // Handle form submission
   const onSubmit = async (data: UpdateUserInput) => {
@@ -97,9 +73,6 @@ export default function EditUserModal({ isOpen, onClose, user }: EditUserModalPr
         ...(data.name && data.name !== user.name && { name: data.name }),
         ...(data.password && { password: data.password }),
         ...(data.role && data.role !== user.role && { role: data.role }),
-        ...(data.teacherCode !== undefined && data.teacherCode !== user.teacherCode && {
-          teacherCode: data.teacherCode
-        }),
       };
 
       const response = await fetch(`/api/admin/users/${user.id}`, {
@@ -217,35 +190,6 @@ export default function EditUserModal({ isOpen, onClose, user }: EditUserModalPr
               <p className="text-sm text-destructive">{errors.role.message}</p>
             )}
           </div>
-
-          {/* Teacher Code Field (conditional) */}
-          {selectedRole === 'TEACHER' && (
-            <div className="space-y-2">
-              <Label htmlFor="edit-teacherCode">Teacher Code</Label>
-              <div className="flex gap-2">
-                <Input
-                  {...register('teacherCode')}
-                  id="edit-teacherCode"
-                  placeholder="TEACH001"
-                  className={errors.teacherCode ? 'border-destructive' : ''}
-                />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={handleGenerateCode}
-                  disabled={isGeneratingCode}
-                >
-                  {isGeneratingCode ? 'Generating...' : 'Generate'}
-                </Button>
-              </div>
-              {errors.teacherCode && (
-                <p className="text-sm text-destructive">{errors.teacherCode.message}</p>
-              )}
-              <p className="text-xs text-muted-foreground">
-                Format: TEACH### (e.g., TEACH001)
-              </p>
-            </div>
-          )}
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleClose}>

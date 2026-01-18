@@ -5,7 +5,7 @@ import { enrollmentSchema } from '@/lib/validations/enrollment';
 
 /**
  * POST /api/student/enroll
- * Enroll a student in all courses taught by a teacher (via teacher code)
+ * Enroll a student in a single course via course code
  */
 export async function POST(request: Request) {
   try {
@@ -33,83 +33,70 @@ export async function POST(request: Request) {
       );
     }
 
-    const { teacherCode } = validationResult.data;
+    const { courseCode } = validationResult.data;
 
-    // Find teacher by code
-    const teacher = await prisma.user.findUnique({
-      where: {
-        teacherCode,
-        role: 'TEACHER',
-      },
+    // Find course by code
+    const course = await prisma.course.findUnique({
+      where: { courseCode },
       include: {
-        courses: {
-          select: {
-            id: true,
-            name: true,
-          },
+        teacher: {
+          select: { name: true },
+        },
+        _count: {
+          select: { lessons: true },
         },
       },
     });
 
-    if (!teacher) {
+    if (!course) {
       return NextResponse.json(
-        { error: 'Invalid teacher code. Please check and try again.' },
+        { error: 'Invalid course code. Please check and try again.' },
         { status: 404 }
       );
     }
 
-    if (teacher.courses.length === 0) {
-      return NextResponse.json(
-        { error: 'This teacher has no courses available yet.' },
-        { status: 404 }
-      );
-    }
-
-    // Check if already enrolled in any courses
-    const existingEnrollments = await prisma.enrollment.findMany({
+    // Check if already enrolled
+    const existingEnrollment = await prisma.enrollment.findUnique({
       where: {
-        studentId: session.user.id,
-        courseId: {
-          in: teacher.courses.map(c => c.id),
+        studentId_courseId: {
+          studentId: session.user.id,
+          courseId: course.id,
         },
       },
     });
 
-    const existingCourseIds = new Set(
-      existingEnrollments.map(e => e.courseId)
-    );
-
-    // Filter out courses already enrolled in
-    const coursesToEnroll = teacher.courses.filter(
-      course => !existingCourseIds.has(course.id)
-    );
-
-    if (coursesToEnroll.length === 0) {
+    if (existingEnrollment) {
       return NextResponse.json(
         {
           success: true,
-          enrolled: 0,
-          courses: [],
-          message: 'You are already enrolled in all courses from this teacher.',
           alreadyEnrolled: true,
+          message: 'You are already enrolled in this course.',
+          course: {
+            id: course.id,
+            name: course.name,
+          },
         },
         { status: 200 }
       );
     }
 
-    // Create enrollments for all new courses
-    await prisma.enrollment.createMany({
-      data: coursesToEnroll.map(course => ({
+    // Create enrollment
+    await prisma.enrollment.create({
+      data: {
         studentId: session.user.id,
         courseId: course.id,
-      })),
+      },
     });
 
     return NextResponse.json({
       success: true,
-      enrolled: coursesToEnroll.length,
-      courses: coursesToEnroll,
-      message: `Successfully enrolled in ${coursesToEnroll.length} course(s)!`,
+      message: `Successfully enrolled in ${course.name}!`,
+      course: {
+        id: course.id,
+        name: course.name,
+        teacher: course.teacher.name,
+        lessonCount: course._count.lessons,
+      },
     }, { status: 201 });
 
   } catch (error) {
