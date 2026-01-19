@@ -101,7 +101,7 @@ export default async function StudentLessonPage({ params }: PageProps) {
           <span>/</span>
           <span className="text-foreground">{lesson.title}</span>
         </div>
-        <h1 className="text-2xl font-bold">{lesson.title}</h1>
+        {/* <h1 className="text-2xl font-bold">{lesson.title}</h1> */}
       </div>
 
       {/* Responsive Layout - Tabs on mobile, two-panel on desktop */}
