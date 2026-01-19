@@ -23,6 +23,7 @@ export function ChatInterface({ lessonId, studentId, initialMessages = [] }: Cha
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [awaitingUserMessage, setAwaitingUserMessage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Handle incoming messages from Socket.io
@@ -33,8 +34,17 @@ export function ChatInterface({ lessonId, studentId, initialMessages = [] }: Cha
       if (exists) return prev;
       return [...prev, message];
     });
-    setIsLoading(false);
-  }, []);
+
+    // If we just received the USER message we sent, now show loading
+    if (message.role === 'USER' && awaitingUserMessage) {
+      setAwaitingUserMessage(false);
+      setIsLoading(true);
+    }
+    // If we received an ASSISTANT message, stop loading
+    else if (message.role === 'ASSISTANT') {
+      setIsLoading(false);
+    }
+  }, [awaitingUserMessage]);
 
   const { sendMessage, isConnected, error } = useChatSocket({
     lessonId, studentId,
@@ -53,7 +63,7 @@ export function ChatInterface({ lessonId, studentId, initialMessages = [] }: Cha
 
     const userMessage = input.trim();
     setInput('');
-    setIsLoading(true);
+    setAwaitingUserMessage(true);
 
     // Send message via Socket.io (don't add optimistically)
     const sent = sendMessage(userMessage, 'USER');
@@ -61,11 +71,12 @@ export function ChatInterface({ lessonId, studentId, initialMessages = [] }: Cha
     if (!sent) {
       // If sending failed, re-enable input and show error
       setInput(userMessage); // Restore the message
-      setIsLoading(false);
+      setAwaitingUserMessage(false);
       alert('Failed to send message. Please check your connection.');
     }
 
     // Note: Message will appear when server broadcasts it back via 'receive_message'
+    // Loading state will be set to true when USER message is received
   };
 
   return (
@@ -136,7 +147,7 @@ export function ChatInterface({ lessonId, studentId, initialMessages = [] }: Cha
               }
             }}
             placeholder="Ask a question about this lesson..."
-            className="min-h-[60px] max-h-[200px] resize-none"
+            className="min-h-15 max-h-50 resize-none"
             disabled={isLoading || !isConnected}
           />
           <Button
