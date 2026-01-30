@@ -203,3 +203,21 @@ enum SummaryStatus {
   COMPLETED      // Summary has been generated
   FAILED         // Generation failed
 }
+
+// AI Settings for configuring OpenAI models
+model AISettings {
+  id        String      @id @default(cuid())
+  type      AIType      @unique  // TRANSCRIPT or CHATBOT
+  model     String      @default("gpt-5-nano")
+  reasoning String      @default("minimal")   // high, medium, low, minimal
+  verbosity String      @default("medium") // high, medium, low
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@map("ai_settings")
+}
+
+enum AIType {
+  TRANSCRIPT  // For transcript summarization
+  CHATBOT     // For tutor chat responses
+}
