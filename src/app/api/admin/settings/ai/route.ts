@@ -8,6 +8,8 @@ const DEFAULT_SETTINGS = {
   model: 'gpt-5-nano',
   reasoning: 'minimal',
   verbosity: 'medium',
+  streaming: false,
+  maxMessagesPerChat: null as number | null,
 };
 
 // GET /api/admin/settings/ai - Get current AI settings
@@ -36,6 +38,8 @@ export async function GET() {
         model: chatbotSettings?.model ?? DEFAULT_SETTINGS.model,
         reasoning: chatbotSettings?.reasoning ?? DEFAULT_SETTINGS.reasoning,
         verbosity: chatbotSettings?.verbosity ?? DEFAULT_SETTINGS.verbosity,
+        streaming: chatbotSettings?.streaming ?? DEFAULT_SETTINGS.streaming,
+        maxMessagesPerChat: chatbotSettings?.maxMessagesPerChat ?? DEFAULT_SETTINGS.maxMessagesPerChat,
       },
     });
   } catch (error) {
@@ -90,12 +94,16 @@ export async function PUT(request: Request) {
           model: chatbot.model,
           reasoning: chatbot.reasoning,
           verbosity: chatbot.verbosity,
+          streaming: chatbot.streaming,
+          maxMessagesPerChat: chatbot.maxMessagesPerChat,
         },
         create: {
           type: 'CHATBOT',
           model: chatbot.model,
           reasoning: chatbot.reasoning,
           verbosity: chatbot.verbosity,
+          streaming: chatbot.streaming,
+          maxMessagesPerChat: chatbot.maxMessagesPerChat,
         },
       }),
     ]);
@@ -112,6 +120,8 @@ export async function PUT(request: Request) {
         model: chatbotSettings.model,
         reasoning: chatbotSettings.reasoning,
         verbosity: chatbotSettings.verbosity,
+        streaming: chatbotSettings.streaming,
+        maxMessagesPerChat: chatbotSettings.maxMessagesPerChat,
       },
     });
   } catch (error) {

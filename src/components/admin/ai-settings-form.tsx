@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -13,6 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Switch } from '@/components/ui/switch';
 import {
   updateAISettingsSchema,
   AI_MODELS,
@@ -193,6 +195,68 @@ export function AISettingsForm({ initialSettings }: AISettingsFormProps) {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+        </div>
+
+        {/* Streaming Toggle */}
+        <div className="flex items-center justify-between rounded-lg border p-4 mt-4">
+          <div className="space-y-0.5">
+            <Label htmlFor="chatbot-streaming" className="text-base">
+              Enable Streaming
+            </Label>
+            <p className="text-sm text-muted-foreground">
+              Stream AI responses in real-time as they are generated, rather than waiting for the complete response
+            </p>
+          </div>
+          <Switch
+            id="chatbot-streaming"
+            checked={form.watch('chatbot.streaming')}
+            onCheckedChange={(checked) => form.setValue('chatbot.streaming', checked)}
+          />
+        </div>
+
+        {/* Max Messages Per Chat */}
+        <div className="rounded-lg border p-4 mt-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="chatbot-maxMessages" className="text-base">
+                Max Messages Per Chat
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Limit the total number of messages (user + AI) in each chat session
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="chatbot-unlimited"
+                  checked={form.watch('chatbot.maxMessagesPerChat') === null}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      form.setValue('chatbot.maxMessagesPerChat', null);
+                    } else {
+                      form.setValue('chatbot.maxMessagesPerChat', 50);
+                    }
+                  }}
+                />
+                <Label htmlFor="chatbot-unlimited" className="text-sm font-normal">
+                  Unlimited
+                </Label>
+              </div>
+              {form.watch('chatbot.maxMessagesPerChat') !== null && (
+                <Input
+                  id="chatbot-maxMessages"
+                  type="number"
+                  min={1}
+                  className="w-24"
+                  value={form.watch('chatbot.maxMessagesPerChat') ?? ''}
+                  onChange={(e) => {
+                    const value = e.target.value ? parseInt(e.target.value, 10) : null;
+                    form.setValue('chatbot.maxMessagesPerChat', value && value > 0 ? value : null);
+                  }}
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>

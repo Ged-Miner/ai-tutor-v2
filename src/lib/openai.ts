@@ -10,10 +10,11 @@ const DEFAULT_CHATBOT_SETTINGS = {
   model: 'gpt-5-nano',
   reasoning: 'minimal',
   verbosity: 'medium',
+  streaming: false,
 };
 
 // Helper to get chatbot AI settings from database
-async function getChatbotSettings() {
+export async function getChatbotSettings() {
   const settings = await prisma.aISettings.findUnique({
     where: { type: 'CHATBOT' },
   });
@@ -22,6 +23,7 @@ async function getChatbotSettings() {
     model: settings?.model ?? DEFAULT_CHATBOT_SETTINGS.model,
     reasoning: settings?.reasoning ?? DEFAULT_CHATBOT_SETTINGS.reasoning,
     verbosity: settings?.verbosity ?? DEFAULT_CHATBOT_SETTINGS.verbosity,
+    streaming: settings?.streaming ?? DEFAULT_CHATBOT_SETTINGS.streaming,
   };
 }
 
@@ -158,6 +160,119 @@ Use the above lesson content to answer the student's questions. Base your answer
     return outputText;
   } catch (error) {
     console.error('❌ Error generating AI response:', error);
+    throw error;
+  }
+}
+
+/**
+ * Generate AI response with streaming support
+ * Yields text chunks as they arrive from the API
+ */
+export async function* generateAIResponseStreaming({
+  lessonId,
+  conversationHistory,
+  userMessage,
+}: GenerateResponseParams): AsyncGenerator<{ type: 'delta' | 'done'; content: string }> {
+  try {
+    // Fetch lesson details for context
+    const lesson = await prisma.lesson.findUnique({
+      where: { id: lessonId },
+      select: {
+        title: true,
+        summary: true,
+        rawTranscript: true,
+      },
+    });
+
+    if (!lesson) {
+      throw new Error('Lesson not found');
+    }
+
+    // Fetch active tutor prompt
+    const systemPrompt = await prisma.systemPrompt.findFirst({
+      where: {
+        isActive: true,
+        name: { contains: 'tutor' },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    const fallbackPrompt = systemPrompt || await prisma.systemPrompt.findFirst({
+      where: { isActive: true },
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    const systemMessage = fallbackPrompt?.content || 'You are a helpful AI tutor assistant.';
+
+    console.log(`🎯 [Streaming] Using prompt: ${fallbackPrompt?.name || 'default fallback'}`);
+
+    // Build context from lesson
+    const lessonContext = `
+# Lesson: ${lesson.title}
+
+## Lesson Summary:
+${lesson.summary || 'No summary available.'}
+
+## Full Transcript:
+${lesson.rawTranscript}
+
+---
+Use the above lesson content to answer the student's questions. Base your answers on this material.
+`;
+
+    // Get AI settings from database
+    const aiSettings = await getChatbotSettings();
+    console.log(`⚙️ [Streaming] Using AI settings: model=${aiSettings.model}, reasoning=${aiSettings.reasoning}, verbosity=${aiSettings.verbosity}`);
+
+    // Build input array for Responses API
+    const input: Array<{ role: string; content: string }> = [
+      { role: 'developer', content: systemMessage },
+      { role: 'developer', content: lessonContext },
+      ...conversationHistory.map(msg => ({
+        role: msg.role === 'user' ? 'user' : 'assistant',
+        content: msg.content,
+      })),
+      { role: 'user', content: userMessage },
+    ];
+
+    // Build API call options with streaming enabled
+    const apiOptions: Record<string, unknown> = {
+      model: aiSettings.model,
+      input,
+      max_output_tokens: 2000,
+      stream: true, // Enable streaming
+      text: {
+        verbosity: aiSettings.verbosity,
+      },
+      reasoning: {
+        effort: aiSettings.reasoning,
+      },
+    };
+
+    // Call OpenAI Responses API with streaming
+    console.log('🤖 [Streaming] Calling OpenAI Responses API...');
+    const stream = await openai.responses.create(
+      apiOptions as Parameters<typeof openai.responses.create>[0]
+    );
+
+    let fullContent = '';
+
+    // Iterate over the stream events
+    for await (const event of stream as AsyncIterable<{ type: string; delta?: string; output_text?: string }>) {
+      // Handle text delta events
+      if (event.type === 'response.output_text.delta' && event.delta) {
+        fullContent += event.delta;
+        yield { type: 'delta', content: event.delta };
+      }
+      // Handle completion event
+      else if (event.type === 'response.completed') {
+        console.log('✅ [Streaming] OpenAI response completed');
+        // Yield the final complete content
+        yield { type: 'done', content: fullContent };
+      }
+    }
+  } catch (error) {
+    console.error('❌ [Streaming] Error generating AI response:', error);
     throw error;
   }
 }

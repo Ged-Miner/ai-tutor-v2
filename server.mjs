@@ -112,6 +112,28 @@ app.prepare().then(() => {
           });
         }
 
+        // Check message limit before saving
+        const chatbotSettings = await prisma.aISettings.findUnique({
+          where: { type: 'CHATBOT' },
+        });
+        const maxMessages = chatbotSettings?.maxMessagesPerChat;
+
+        if (maxMessages !== null && maxMessages !== undefined) {
+          const messageCount = await prisma.message.count({
+            where: { chatSessionId: chatSession.id },
+          });
+
+          if (messageCount >= maxMessages) {
+            console.log(`❌ Message limit reached: ${messageCount}/${maxMessages}`);
+            socket.emit('message_error', {
+              error: 'Message limit reached for this chat session',
+              code: 'LIMIT_REACHED',
+              limit: maxMessages,
+            });
+            return;
+          }
+        }
+
         // Save user message to database
         const userMessage = await prisma.message.create({
           data: {
@@ -141,44 +163,139 @@ app.prepare().then(() => {
             content: msg.content,
           }));
 
-          // Call API route to generate AI response
-          const apiUrl = `${process.env.NEXTAUTH_URL || `http://localhost:${port}`}/api/chat/generate-response`;
-          const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
+          // Use chatbotSettings fetched earlier for limit check
+          const streamingEnabled = chatbotSettings?.streaming ?? false;
+
+          const baseUrl = process.env.NEXTAUTH_URL || `http://localhost:${port}`;
+
+          if (streamingEnabled) {
+            // Use streaming API
+            console.log('🔄 Using streaming mode...');
+
+            // Generate a temporary ID for the streaming message
+            const tempId = `temp-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+
+            // Emit stream start event
+            io.to(`lesson:${lessonId}`).emit('receive_message_stream_start', {
+              tempId,
               lessonId,
-              conversationHistory,
-              userMessage: content,
-            }),
-          });
+            });
 
-          if (!response.ok) {
-            throw new Error(`API returned ${response.status}`);
+            const streamApiUrl = `${baseUrl}/api/chat/generate-response-stream`;
+            const streamResponse = await fetch(streamApiUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                lessonId,
+                conversationHistory,
+                userMessage: content,
+              }),
+            });
+
+            if (!streamResponse.ok) {
+              throw new Error(`Streaming API returned ${streamResponse.status}`);
+            }
+
+            // Process the SSE stream
+            let fullContent = '';
+            const reader = streamResponse.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+
+              buffer += decoder.decode(value, { stream: true });
+              const lines = buffer.split('\n');
+              buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  const data = line.slice(6).trim();
+                  if (data === '[DONE]') {
+                    continue;
+                  }
+                  try {
+                    const parsed = JSON.parse(data);
+                    if (parsed.type === 'delta') {
+                      fullContent += parsed.content;
+                      // Emit delta event
+                      io.to(`lesson:${lessonId}`).emit('receive_message_stream_delta', {
+                        tempId,
+                        delta: parsed.content,
+                      });
+                    }
+                  } catch (e) {
+                    // Ignore parse errors for incomplete JSON
+                  }
+                }
+              }
+            }
+
+            // Save the complete AI response to database
+            const aiMessage = await prisma.message.create({
+              data: {
+                chatSessionId: chatSession.id,
+                content: fullContent,
+                role: 'ASSISTANT',
+              },
+            });
+
+            console.log('✅ AI streaming response saved to database:', aiMessage.id);
+
+            // Emit stream end event with the final message
+            io.to(`lesson:${lessonId}`).emit('receive_message_stream_end', {
+              tempId,
+              message: {
+                id: aiMessage.id,
+                content: aiMessage.content,
+                role: aiMessage.role,
+                createdAt: aiMessage.createdAt.toISOString(),
+              },
+            });
+          } else {
+            // Use non-streaming API (original behavior)
+            const apiUrl = `${baseUrl}/api/chat/generate-response`;
+            const response = await fetch(apiUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                lessonId,
+                conversationHistory,
+                userMessage: content,
+              }),
+            });
+
+            if (!response.ok) {
+              throw new Error(`API returned ${response.status}`);
+            }
+
+            const { response: aiResponseContent } = await response.json();
+
+            // Save AI response to database
+            const aiMessage = await prisma.message.create({
+              data: {
+                chatSessionId: chatSession.id,
+                content: aiResponseContent,
+                role: 'ASSISTANT',
+              },
+            });
+
+            console.log('✅ AI response saved to database:', aiMessage.id);
+
+            // Broadcast AI response to everyone in the lesson room
+            io.to(`lesson:${lessonId}`).emit('receive_message', {
+              id: aiMessage.id,
+              content: aiMessage.content,
+              role: aiMessage.role,
+              createdAt: aiMessage.createdAt.toISOString(),
+            });
           }
-
-          const { response: aiResponseContent } = await response.json();
-
-          // Save AI response to database
-          const aiMessage = await prisma.message.create({
-            data: {
-              chatSessionId: chatSession.id,
-              content: aiResponseContent,
-              role: 'ASSISTANT',
-            },
-          });
-
-          console.log('✅ AI response saved to database:', aiMessage.id);
-
-          // Broadcast AI response to everyone in the lesson room
-          io.to(`lesson:${lessonId}`).emit('receive_message', {
-            id: aiMessage.id,
-            content: aiMessage.content,
-            role: aiMessage.role,
-            createdAt: aiMessage.createdAt.toISOString(),
-          });
         }
       } catch (error) {
         console.error('❌ Error handling message:', error);

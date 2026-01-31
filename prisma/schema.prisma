@@ -206,13 +206,15 @@ enum SummaryStatus {
 
 // AI Settings for configuring OpenAI models
 model AISettings {
-  id        String      @id @default(cuid())
-  type      AIType      @unique  // TRANSCRIPT or CHATBOT
-  model     String      @default("gpt-5-nano")
-  reasoning String      @default("minimal")   // high, medium, low, minimal
-  verbosity String      @default("medium") // high, medium, low
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id                 String      @id @default(cuid())
+  type               AIType      @unique  // TRANSCRIPT or CHATBOT
+  model              String      @default("gpt-5-nano")
+  reasoning          String      @default("minimal")   // high, medium, low, minimal
+  verbosity          String      @default("medium") // high, medium, low
+  streaming          Boolean     @default(false)    // Enable streaming responses (chatbot only)
+  maxMessagesPerChat Int?                           // Max messages per chat session (null = unlimited, chatbot only)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
 
   @@map("ai_settings")
 }

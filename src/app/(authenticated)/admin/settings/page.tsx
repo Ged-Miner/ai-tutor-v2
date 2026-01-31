@@ -10,10 +10,14 @@ const DEFAULT_SETTINGS: {
   model: AIModel;
   reasoning: ReasoningLevel;
   verbosity: VerbosityLevel;
+  streaming: boolean;
+  maxMessagesPerChat: number | null;
 } = {
   model: 'gpt-5-nano',
   reasoning: 'minimal',
   verbosity: 'medium',
+  streaming: false,
+  maxMessagesPerChat: null,
 };
 
 export default async function AdminSettingsPage() {
@@ -43,6 +47,8 @@ export default async function AdminSettingsPage() {
       model: (chatbotSettings?.model ?? DEFAULT_SETTINGS.model) as AIModel,
       reasoning: (chatbotSettings?.reasoning ?? DEFAULT_SETTINGS.reasoning) as ReasoningLevel,
       verbosity: (chatbotSettings?.verbosity ?? DEFAULT_SETTINGS.verbosity) as VerbosityLevel,
+      streaming: chatbotSettings?.streaming ?? DEFAULT_SETTINGS.streaming,
+      maxMessagesPerChat: chatbotSettings?.maxMessagesPerChat ?? DEFAULT_SETTINGS.maxMessagesPerChat,
     },
   };
 
