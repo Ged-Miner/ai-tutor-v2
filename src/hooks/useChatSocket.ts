@@ -12,7 +12,7 @@ interface Message {
 
 interface StreamStartData {
   tempId: string;
-  lessonId: string;
+  chatSessionId: string;
 }
 
 interface StreamDeltaData {
@@ -32,7 +32,7 @@ interface MessageError {
 }
 
 interface UseChatSocketProps {
-  lessonId: string;
+  chatSessionId: string;
   studentId: string;
   onMessageReceived: (message: Message) => void;
   // Streaming callbacks (optional)
@@ -44,7 +44,7 @@ interface UseChatSocketProps {
 }
 
 export function useChatSocket({
-  lessonId,
+  chatSessionId,
   studentId,
   onMessageReceived,
   onStreamStart,
@@ -54,19 +54,19 @@ export function useChatSocket({
 }: UseChatSocketProps) {
   const { socket, isConnected, error } = useSocket();
 
-  // Join the lesson room when connected
+  // Join the chat session room when connected
   useEffect(() => {
     if (!socket || !isConnected) return;
 
-    console.log(`📚 Joining lesson room: ${lessonId}`);
-    socket.emit('join_lesson', lessonId);
+    console.log(`💬 Joining session room: ${chatSessionId}`);
+    socket.emit('join_session', chatSessionId);
 
     // Leave room on unmount
     return () => {
-      console.log(`👋 Leaving lesson room: ${lessonId}`);
-      socket.emit('leave_lesson', lessonId);
+      console.log(`👋 Leaving session room: ${chatSessionId}`);
+      socket.emit('leave_session', chatSessionId);
     };
-  }, [socket, isConnected, lessonId]);
+  }, [socket, isConnected, chatSessionId]);
 
   // Listen for incoming messages
   useEffect(() => {
@@ -145,16 +145,16 @@ export function useChatSocket({
       return false;
     }
 
-    console.log('📤 Sending message:', { lessonId, studentId, content, role });
+    console.log('📤 Sending message:', { chatSessionId, studentId, content, role });
     socket.emit('send_message', {
-      lessonId,
+      chatSessionId,
       studentId,
       content,
       role,
     });
 
     return true;
-  }, [socket, isConnected, lessonId, studentId]);
+  }, [socket, isConnected, chatSessionId, studentId]);
 
   return {
     sendMessage,

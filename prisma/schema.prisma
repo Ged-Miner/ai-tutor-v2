@@ -127,6 +127,7 @@ model ChatSession {
   id        String    @id @default(cuid())
   lessonId  String
   studentId String
+  name      String    @default("Chat 1")
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
@@ -134,9 +135,9 @@ model ChatSession {
   student   User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
   messages  Message[]
 
-  @@unique([lessonId, studentId])
   @@index([lessonId])
   @@index([studentId])
+  @@index([lessonId, studentId])
   @@map("chat_sessions")
 }
 

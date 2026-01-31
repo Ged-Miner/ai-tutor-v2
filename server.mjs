@@ -63,16 +63,16 @@ app.prepare().then(() => {
   io.on('connection', (socket) => {
     console.log('✅ Client connected:', socket.id);
 
-    // Handle joining a lesson room
-    socket.on('join_lesson', (lessonId) => {
-      socket.join(`lesson:${lessonId}`);
-      console.log(`📚 Socket ${socket.id} joined lesson:${lessonId}`);
+    // Handle joining a chat session room
+    socket.on('join_session', (chatSessionId) => {
+      socket.join(`session:${chatSessionId}`);
+      console.log(`💬 Socket ${socket.id} joined session:${chatSessionId}`);
     });
 
-    // Handle leaving a lesson room
-    socket.on('leave_lesson', (lessonId) => {
-      socket.leave(`lesson:${lessonId}`);
-      console.log(`👋 Socket ${socket.id} left lesson:${lessonId}`);
+    // Handle leaving a chat session room
+    socket.on('leave_session', (chatSessionId) => {
+      socket.leave(`session:${chatSessionId}`);
+      console.log(`👋 Socket ${socket.id} left session:${chatSessionId}`);
     });
 
     // Handle chat messages
@@ -80,16 +80,11 @@ app.prepare().then(() => {
       console.log('💬 Message received:', data);
 
       try {
-        const { lessonId, content, role, studentId } = data;
+        const { chatSessionId, content, role, studentId } = data;
 
-        // Find or create chat session
-        let chatSession = await prisma.chatSession.findUnique({
-          where: {
-            lessonId_studentId: {
-              lessonId,
-              studentId,
-            },
-          },
+        // Find chat session by ID
+        const chatSession = await prisma.chatSession.findUnique({
+          where: { id: chatSessionId },
           include: {
             messages: {
               orderBy: {
@@ -101,16 +96,23 @@ app.prepare().then(() => {
         });
 
         if (!chatSession) {
-          chatSession = await prisma.chatSession.create({
-            data: {
-              lessonId,
-              studentId,
-            },
-            include: {
-              messages: true,
-            },
+          socket.emit('message_error', {
+            error: 'Chat session not found',
+            code: 'SESSION_NOT_FOUND',
           });
+          return;
         }
+
+        // Verify ownership
+        if (chatSession.studentId !== studentId) {
+          socket.emit('message_error', {
+            error: 'Access denied',
+            code: 'ACCESS_DENIED',
+          });
+          return;
+        }
+
+        const lessonId = chatSession.lessonId;
 
         // Check message limit before saving
         const chatbotSettings = await prisma.aISettings.findUnique({
@@ -145,8 +147,8 @@ app.prepare().then(() => {
 
         console.log('✅ User message saved to database:', userMessage.id);
 
-        // Broadcast user message to everyone in the lesson room
-        io.to(`lesson:${lessonId}`).emit('receive_message', {
+        // Broadcast user message to everyone in the session room
+        io.to(`session:${chatSessionId}`).emit('receive_message', {
           id: userMessage.id,
           content: userMessage.content,
           role: userMessage.role,
@@ -176,9 +178,9 @@ app.prepare().then(() => {
             const tempId = `temp-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 
             // Emit stream start event
-            io.to(`lesson:${lessonId}`).emit('receive_message_stream_start', {
+            io.to(`session:${chatSessionId}`).emit('receive_message_stream_start', {
               tempId,
-              lessonId,
+              chatSessionId,
             });
 
             const streamApiUrl = `${baseUrl}/api/chat/generate-response-stream`;
@@ -223,7 +225,7 @@ app.prepare().then(() => {
                     if (parsed.type === 'delta') {
                       fullContent += parsed.content;
                       // Emit delta event
-                      io.to(`lesson:${lessonId}`).emit('receive_message_stream_delta', {
+                      io.to(`session:${chatSessionId}`).emit('receive_message_stream_delta', {
                         tempId,
                         delta: parsed.content,
                       });
@@ -247,7 +249,7 @@ app.prepare().then(() => {
             console.log('✅ AI streaming response saved to database:', aiMessage.id);
 
             // Emit stream end event with the final message
-            io.to(`lesson:${lessonId}`).emit('receive_message_stream_end', {
+            io.to(`session:${chatSessionId}`).emit('receive_message_stream_end', {
               tempId,
               message: {
                 id: aiMessage.id,
@@ -288,8 +290,8 @@ app.prepare().then(() => {
 
             console.log('✅ AI response saved to database:', aiMessage.id);
 
-            // Broadcast AI response to everyone in the lesson room
-            io.to(`lesson:${lessonId}`).emit('receive_message', {
+            // Broadcast AI response to everyone in the session room
+            io.to(`session:${chatSessionId}`).emit('receive_message', {
               id: aiMessage.id,
               content: aiMessage.content,
               role: aiMessage.role,

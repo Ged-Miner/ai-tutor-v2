@@ -14,9 +14,10 @@ interface Message {
 }
 
 interface ChatInterfaceProps {
-  lessonId: string;
+  chatSessionId: string;
   studentId: string;
   initialMessages?: Message[];
+  onSessionLimitReached?: () => void;
 }
 
 // Track streaming message state
@@ -25,7 +26,7 @@ interface StreamingMessage {
   content: string;
 }
 
-export function ChatInterface({ lessonId, studentId, initialMessages = [] }: ChatInterfaceProps) {
+export function ChatInterface({ chatSessionId, studentId, initialMessages = [], onSessionLimitReached }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -56,7 +57,7 @@ export function ChatInterface({ lessonId, studentId, initialMessages = [] }: Cha
   }, [awaitingUserMessage]);
 
   // Handle streaming start
-  const handleStreamStart = useCallback(({ tempId }: { tempId: string; lessonId: string }) => {
+  const handleStreamStart = useCallback(({ tempId }: { tempId: string; chatSessionId: string }) => {
     setIsLoading(false); // Stop showing "Thinking..." since we're now streaming
     setStreamingMessage({ tempId, content: '' });
   }, []);
@@ -94,16 +95,18 @@ export function ChatInterface({ lessonId, studentId, initialMessages = [] }: Cha
 
     if (error.code === 'LIMIT_REACHED') {
       setLimitReached(true);
-      setMessageError(`Message limit reached (${error.limit} messages). This chat session has ended.`);
+      setMessageError(`Message limit reached (${error.limit} messages). Please create a new chat.`);
+      // Notify parent component so it can offer to create a new session
+      onSessionLimitReached?.();
     } else {
       setMessageError(error.error);
       // Clear non-limit errors after 5 seconds
       setTimeout(() => setMessageError(null), 5000);
     }
-  }, []);
+  }, [onSessionLimitReached]);
 
   const { sendMessage, isConnected, error } = useChatSocket({
-    lessonId,
+    chatSessionId,
     studentId,
     onMessageReceived: handleMessageReceived,
     onStreamStart: handleStreamStart,
@@ -219,7 +222,7 @@ export function ChatInterface({ lessonId, studentId, initialMessages = [] }: Cha
       <div className="border-t p-4">
         {limitReached ? (
           <div className="text-center text-muted-foreground py-2">
-            <p className="text-sm">This chat session has reached its message limit.</p>
+            <p className="text-sm">This chat session has reached its message limit. Please create a new chat.</p>
           </div>
         ) : (
           <>

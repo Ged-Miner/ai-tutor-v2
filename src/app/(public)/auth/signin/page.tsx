@@ -167,15 +167,6 @@ function SignInForm() {
             Sign up
           </a>
         </p>
-
-        <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-          <p className="text-xs font-semibold text-blue-900 mb-2">Demo Accounts:</p>
-          <div className="space-y-1 text-xs text-blue-800">
-            <p>Admin: admin@aitutor.com</p>
-            <p>Teacher: john.smith@university.edu</p>
-            <p>Student: alice@student.edu</p>
-          </div>
-        </div>
       </div>
     </div>
   );
