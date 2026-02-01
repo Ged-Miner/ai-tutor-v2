@@ -49,6 +49,7 @@ export async function generateAIResponse({
         title: true,
         summary: true,
         rawTranscript: true,
+        customPrompt: true,
       },
     });
 
@@ -82,7 +83,17 @@ export async function generateAIResponse({
 
     const systemMessage = fallbackPrompt?.content || 'You are a helpful AI tutor assistant.';
 
-    console.log(`🎯 Using prompt: ${fallbackPrompt?.name || 'default fallback'} (v${fallbackPrompt?.version || 'N/A'})`);
+    // Append teacher's custom prompt if present
+    let enhancedSystemMessage = systemMessage;
+    if (lesson.customPrompt && lesson.customPrompt.trim()) {
+      enhancedSystemMessage = `${systemMessage}
+
+---
+Additional instructions from teacher:
+${lesson.customPrompt.trim()}`;
+    }
+
+    console.log(`🎯 Using prompt: ${fallbackPrompt?.name || 'default fallback'} (v${fallbackPrompt?.version || 'N/A'})${lesson.customPrompt ? ' + custom prompt' : ''}`);
 
     // Build context from lesson
     const lessonContext = `
@@ -105,7 +116,7 @@ Use the above lesson content to answer the student's questions. Base your answer
     // Build input array for Responses API
     // Responses API uses 'developer' role for system instructions
     const input: Array<{ role: string; content: string }> = [
-      { role: 'developer', content: systemMessage },
+      { role: 'developer', content: enhancedSystemMessage },
       { role: 'developer', content: lessonContext },
       // Add conversation history
       ...conversationHistory.map(msg => ({
@@ -181,6 +192,7 @@ export async function* generateAIResponseStreaming({
         title: true,
         summary: true,
         rawTranscript: true,
+        customPrompt: true,
       },
     });
 
@@ -204,7 +216,17 @@ export async function* generateAIResponseStreaming({
 
     const systemMessage = fallbackPrompt?.content || 'You are a helpful AI tutor assistant.';
 
-    console.log(`🎯 [Streaming] Using prompt: ${fallbackPrompt?.name || 'default fallback'}`);
+    // Append teacher's custom prompt if present
+    let enhancedSystemMessage = systemMessage;
+    if (lesson.customPrompt && lesson.customPrompt.trim()) {
+      enhancedSystemMessage = `${systemMessage}
+
+---
+Additional instructions from teacher:
+${lesson.customPrompt.trim()}`;
+    }
+
+    console.log(`🎯 [Streaming] Using prompt: ${fallbackPrompt?.name || 'default fallback'}${lesson.customPrompt ? ' + custom prompt' : ''}`);
 
     // Build context from lesson
     const lessonContext = `
@@ -226,7 +248,7 @@ Use the above lesson content to answer the student's questions. Base your answer
 
     // Build input array for Responses API
     const input: Array<{ role: string; content: string }> = [
-      { role: 'developer', content: systemMessage },
+      { role: 'developer', content: enhancedSystemMessage },
       { role: 'developer', content: lessonContext },
       ...conversationHistory.map(msg => ({
         role: msg.role === 'user' ? 'user' : 'assistant',
