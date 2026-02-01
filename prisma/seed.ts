@@ -148,7 +148,6 @@ async function main() {
     data: {
       courseId: course1.id,
       title: 'Introduction to Programming',
-      lessonCode: 'CS101-L001',
       position: 1,
       rawTranscript: `[00:00] Welcome to Introduction to Programming. Today we'll cover the basics of variables and data types.
 [00:30] Let's start with variables. A variable is a container that stores data values.
@@ -192,7 +191,6 @@ We'll cover operators and expressions.`,
     data: {
       courseId: course1.id,
       title: 'Control Flow and Conditionals',
-      lessonCode: 'CS101-L002',
       position: 2,
       rawTranscript: `[00:00] Today we're learning about control flow and conditional statements.
 [00:30] Control flow determines the order in which code executes.
@@ -252,7 +250,6 @@ else:
     data: {
       courseId: course3.id,
       title: 'HTML Fundamentals',
-      lessonCode: 'WEB101-L001',
       position: 1,
       rawTranscript: `[00:00] Welcome to Web Development. Today we're starting with HTML.
 [00:30] HTML stands for HyperText Markup Language.

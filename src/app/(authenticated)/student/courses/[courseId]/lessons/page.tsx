@@ -2,7 +2,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 // import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 
 interface PageProps {
@@ -61,7 +61,6 @@ export default async function StudentCourseLessonsPage({ params }: PageProps) {
     select: {
       id: true,
       title: true,
-      lessonCode: true,
       position: true,
       createdAt: true,
       summary: true,
@@ -112,11 +111,6 @@ export default async function StudentCourseLessonsPage({ params }: PageProps) {
                         <CardTitle className="text-base line-clamp-2">
                           {lesson.position + 1}. {lesson.title}
                         </CardTitle>
-                        <CardDescription className="mt-2">
-                          <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                            {lesson.lessonCode}
-                          </code>
-                        </CardDescription>
                       </div>
                     </div>
                     <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">

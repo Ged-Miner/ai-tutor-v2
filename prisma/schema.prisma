@@ -94,7 +94,6 @@ model Lesson {
   rawTranscript String    @db.Text
   summary       String?   @db.Text
   summaryStatus SummaryStatus @default(NOT_STARTED)
-  lessonCode    String    @unique
   position      Int
   customPrompt  String?   @db.Text
   createdAt     DateTime  @default(now())
@@ -104,7 +103,6 @@ model Lesson {
   chatSessions  ChatSession[]
 
   @@index([courseId])
-  @@index([lessonCode])
   @@map("lessons")
 }
 

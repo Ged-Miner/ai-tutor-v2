@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { createLessonSchema } from '@/lib/validations/lesson';
-import { generateLessonCode } from '@/lib/utils/generate-lesson-code';
 
 /**
  * GET /api/teacher/courses/[courseId]/lessons
@@ -123,9 +122,6 @@ export async function POST(
 
     const { title, rawTranscript, summary, customPrompt, position } = validationResult.data;
 
-    // Generate unique lesson code
-    const lessonCode = await generateLessonCode();
-
     // Determine position if not provided
     let lessonPosition = position;
     if (lessonPosition === undefined) {
@@ -145,7 +141,6 @@ export async function POST(
         summary: summary || null,
         summaryStatus: summary ? 'COMPLETED' : 'NOT_STARTED',
         customPrompt: customPrompt || null,
-        lessonCode,
         position: lessonPosition,
         courseId,
       },

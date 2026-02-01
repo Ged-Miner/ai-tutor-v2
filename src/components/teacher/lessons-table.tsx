@@ -19,7 +19,6 @@ import { CreateLessonButton } from './create-lesson-button';
 interface Lesson {
   id: string;
   title: string;
-  lessonCode: string;
   position: number;
   rawTranscript: string;
   summary: string | null;
@@ -90,7 +89,6 @@ export function LessonsTable({ lessons, courseId }: LessonsTableProps) {
             <TableRow>
               <TableHead className="w-16">Order</TableHead>
               <TableHead>Lesson Title</TableHead>
-              <TableHead className="hidden sm:table-cell">Lesson Code</TableHead>
               <TableHead className="hidden lg:table-cell">Summary</TableHead>
               <TableHead className="hidden sm:table-cell">Chat Sessions</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -103,12 +101,7 @@ export function LessonsTable({ lessons, courseId }: LessonsTableProps) {
                   {lesson.position + 1}
                 </TableCell>
                 <TableCell className="font-medium">{lesson.title}</TableCell>
-                <TableCell className="hidden sm:table-cell">
-                  <code className="rounded bg-muted px-2 py-1 text-xs">
-                    {lesson.lessonCode}
-                  </code>
-                </TableCell>
-                <TableCell className="hidden lg:table-cell"> {/* ADD THIS */}
+                <TableCell className="hidden lg:table-cell">
                   <SummaryStatusBadge summaryStatus={lesson.summaryStatus} />
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">{lesson._count.chatSessions}</TableCell>
@@ -154,12 +147,6 @@ export function LessonsTable({ lessons, courseId }: LessonsTableProps) {
                   </div>
                   <div className="flex flex-col gap-1 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
-                      <span>Code:</span>
-                      <code className="rounded bg-muted px-2 py-0.5 text-xs">
-                        {lesson.lessonCode}
-                      </code>
-                    </div>
-                    <div className="flex items-center gap-2"> {/* ADD THIS */}
                       <span>Summary:</span>
                       <SummaryStatusBadge summaryStatus={lesson.summaryStatus} />
                     </div>
