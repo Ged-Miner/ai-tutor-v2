@@ -39,7 +39,6 @@ export async function GET(
         email: true,
         name: true,
         role: true,
-        teacherCode: true,
         createdAt: true,
         updatedAt: true,
         _count: {
@@ -122,7 +121,7 @@ export async function PUT(
       );
     }
 
-    const { email, name, password, role, teacherCode } = validationResult.data;
+    const { email, name, password, role } = validationResult.data;
 
     // Check if email is being changed and already exists
     if (email && email !== existingUser.email) {
@@ -138,71 +137,6 @@ export async function PUT(
       }
     }
 
-    // Handle teacher code validation
-    let finalTeacherCode = existingUser.teacherCode;
-
-    if (role !== undefined) {
-      if (role === 'TEACHER') {
-        // If changing to TEACHER, need a teacher code
-        if (teacherCode !== undefined) {
-          if (!teacherCode) {
-            return NextResponse.json(
-              { error: 'Teacher code is required for teachers' },
-              { status: 400 }
-            );
-          }
-
-          // Check if teacherCode already exists (and it's not the current user's code)
-          if (teacherCode !== existingUser.teacherCode) {
-            const existingTeacherCode = await prisma.user.findUnique({
-              where: { teacherCode },
-            });
-
-            if (existingTeacherCode) {
-              return NextResponse.json(
-                { error: 'Teacher code already exists' },
-                { status: 409 }
-              );
-            }
-          }
-
-          finalTeacherCode = teacherCode;
-        } else if (!existingUser.teacherCode) {
-          // Changing to TEACHER but no code provided and user doesn't have one
-          return NextResponse.json(
-            { error: 'Teacher code is required for teachers' },
-            { status: 400 }
-          );
-        }
-      } else {
-        // If changing away from TEACHER, remove teacher code
-        finalTeacherCode = null;
-      }
-    } else if (teacherCode !== undefined && existingUser.role === 'TEACHER') {
-      // Not changing role, but updating teacher code
-      if (!teacherCode) {
-        return NextResponse.json(
-          { error: 'Teacher code is required for teachers' },
-          { status: 400 }
-        );
-      }
-
-      if (teacherCode !== existingUser.teacherCode) {
-        const existingTeacherCode = await prisma.user.findUnique({
-          where: { teacherCode },
-        });
-
-        if (existingTeacherCode) {
-          return NextResponse.json(
-            { error: 'Teacher code already exists' },
-            { status: 409 }
-          );
-        }
-      }
-
-      finalTeacherCode = teacherCode;
-    }
-
     // Prepare update data
     const updateData: Prisma.UserUpdateInput = {};
 
@@ -211,11 +145,6 @@ export async function PUT(
     if (role) updateData.role = role;
     if (password) {
       updateData.password = await bcrypt.hash(password, 10);
-    }
-
-    // Only update teacherCode if role logic determined a change
-    if (role !== undefined || teacherCode !== undefined) {
-      updateData.teacherCode = finalTeacherCode;
     }
 
     // Update user
@@ -227,7 +156,6 @@ export async function PUT(
         email: true,
         name: true,
         role: true,
-        teacherCode: true,
         createdAt: true,
         updatedAt: true,
       },

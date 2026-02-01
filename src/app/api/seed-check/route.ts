@@ -16,7 +16,6 @@ export async function GET() {
         name: true,
         email: true,
         role: true,
-        teacherCode: true,
       },
     });
 
@@ -44,7 +43,6 @@ export async function GET() {
       select: {
         id: true,
         title: true,
-        lessonCode: true,
         position: true,
         course: {
           select: {

@@ -4,6 +4,7 @@ import { signIn } from 'next-auth/react';
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { validateAndSignIn } from './actions';
 
 // Separate component that uses useSearchParams
 function SignInForm() {
@@ -29,21 +30,24 @@ function SignInForm() {
     setLoading(true);
 
     try {
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-      });
+      // Use server action to validate credentials and get specific error messages
+      const result = await validateAndSignIn(email, password);
 
-      if (result?.error) {
+      if (result.error) {
         setError(result.error);
         setLoading(false);
-      } else {
+      } else if (result.success) {
+        // Refresh the session and redirect
         router.push('/dashboard');
+        router.refresh();
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+        setLoading(false);
       }
     } catch (err) {
-      setError(`An unexpected error occurred: ${err}`);
+      setError('An unexpected error occurred. Please try again.');
       setLoading(false);
+      console.error('Sign in error:', err);
     }
   };
 
@@ -163,15 +167,6 @@ function SignInForm() {
             Sign up
           </a>
         </p>
-
-        <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-          <p className="text-xs font-semibold text-blue-900 mb-2">Demo Accounts:</p>
-          <div className="space-y-1 text-xs text-blue-800">
-            <p>Admin: admin@aitutor.com</p>
-            <p>Teacher: john.smith@university.edu</p>
-            <p>Student: alice@student.edu</p>
-          </div>
-        </div>
       </div>
     </div>
   );

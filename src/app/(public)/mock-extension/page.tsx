@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 export default function MockExtensionPage() {
   const [formData, setFormData] = useState({
-    teacherCode: 'TEACH001',
+    courseCode: '',
     courseName: 'Introduction to Biology',
     lessonTitle: 'Cell Structure and Function',
     transcript: `00:00 - Welcome to today's lesson on cell structure. We'll be covering the basic building blocks of life.
@@ -72,7 +72,7 @@ export default function MockExtensionPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          teacherCode: formData.teacherCode,
+          courseCode: formData.courseCode,
           courseName: formData.courseName,
           lessonTitle: formData.lessonTitle,
           transcript: formData.transcript,
@@ -114,28 +114,30 @@ export default function MockExtensionPage() {
       <div className="max-w-4xl mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle>Mock Chrome Extension - Transcript Upload</CardTitle>
+            <CardTitle>Transcript Upload Tester</CardTitle>
             <CardDescription>
-              Simulate transcript uploads from the Chrome extension for testing purposes.
-              This form mimics what the real Chrome extension will do.
+              Test transcript uploads to the system. This simulates uploads from any source
+              (Chrome extension, web app, voice typing tools, etc.)
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Teacher Code */}
+              {/* Course Code */}
               <div>
-                <Label htmlFor="teacherCode">Teacher Code *</Label>
+                <Label htmlFor="courseCode">Course Code *</Label>
                 <Input
-                  id="teacherCode"
-                  value={formData.teacherCode}
+                  id="courseCode"
+                  value={formData.courseCode}
                   onChange={(e) =>
-                    setFormData({ ...formData, teacherCode: e.target.value })
+                    setFormData({ ...formData, courseCode: e.target.value.toUpperCase() })
                   }
-                  placeholder="TEACH001"
+                  placeholder="A3X9K2M"
                   required
+                  maxLength={7}
+                  className="font-mono"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Format: TEACH### (e.g., TEACH001, TEACH123)
+                  Enter the 7-character course code (e.g., A3X9K2M). Find this in your course list.
                 </p>
               </div>
 
@@ -258,12 +260,12 @@ export default function MockExtensionPage() {
                   variant="outline"
                   onClick={() => {
                     setFormData({
-                      teacherCode: 'TEACH001',
+                      courseCode: '',
                       courseName: 'Introduction to Biology',
                       lessonTitle: 'Cell Structure and Function',
                       transcript: formData.transcript,
                       duration: 45,
-                      source: 'mock-extension-test',
+                      source: 'transcript-tester',
                     });
                     setResult(null);
                   }}
@@ -279,17 +281,20 @@ export default function MockExtensionPage() {
                 Testing Instructions:
               </h3>
               <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-                <li>Use a valid teacher code from your database (e.g., TEACH001)</li>
-                <li>Fill in course name and lesson title</li>
-                <li>The transcript is pre-filled with sample content</li>
-                <li>Click &quot;Upload Transcript&quot; to test</li>
+                <li>Create a course as a teacher or admin, and copy the 7-character course code</li>
+                <li>Paste the course code in the field above (e.g., A3X9K2M)</li>
+                <li>Fill in the course name and lesson title that match your course</li>
+                <li>The transcript is pre-filled with sample content - modify as needed</li>
+                <li>Click &quot;Upload Transcript&quot; to send it to the API</li>
                 <li>
-                  Log in as the teacher to see the pending transcript and create
-                  a lesson
+                  Log in as the teacher who owns that course to see the pending transcript
                 </li>
                 <li>
-                  Upload the same lesson again within 2 hours to test the
-                  &quot;append&quot; functionality
+                  Process the pending transcript to create a lesson from it
+                </li>
+                <li>
+                  Upload the same course/lesson again within 2 hours to test the
+                  &quot;append&quot; functionality (transcripts are merged)
                 </li>
               </ol>
             </div>

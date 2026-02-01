@@ -6,6 +6,26 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Default AI settings for transcript summarization
+const DEFAULT_TRANSCRIPT_SETTINGS = {
+  model: 'gpt-5-nano',
+  reasoning: 'minimal',
+  verbosity: 'medium',
+};
+
+// Helper to get transcript AI settings from database
+async function getTranscriptSettings() {
+  const settings = await prisma.aISettings.findUnique({
+    where: { type: 'TRANSCRIPT' },
+  });
+
+  return {
+    model: settings?.model ?? DEFAULT_TRANSCRIPT_SETTINGS.model,
+    reasoning: settings?.reasoning ?? DEFAULT_TRANSCRIPT_SETTINGS.reasoning,
+    verbosity: settings?.verbosity ?? DEFAULT_TRANSCRIPT_SETTINGS.verbosity,
+  };
+}
+
 /**
  * Generate a lesson summary from a raw transcript using OpenAI
  * @param transcript - The raw transcript text
@@ -29,29 +49,50 @@ export async function generateLessonSummary(
       throw new Error('System prompt for transcript summarization not found');
     }
 
-    // Call OpenAI to generate summary
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: systemPromptRecord.content,
-        },
-        {
-          role: 'user',
-          content: `Lesson Title: ${lessonTitle}\n\nTranscript:\n${transcript}`,
-        },
-      ],
-      temperature: 0.7,
-      max_tokens: 2000, // Summaries can be longer than chat responses
-    });
+    // Get AI settings from database
+    const aiSettings = await getTranscriptSettings();
+    console.log(`⚙️ Transcript AI settings: model=${aiSettings.model}, reasoning=${aiSettings.reasoning}, verbosity=${aiSettings.verbosity}`);
 
-    const summary = completion.choices[0]?.message?.content;
+    // Build input array for Responses API
+    // Responses API uses 'developer' role for system instructions
+    const input: Array<{ role: string; content: string }> = [
+      { role: 'developer', content: systemPromptRecord.content },
+      { role: 'user', content: `Lesson Title: ${lessonTitle}\n\nTranscript:\n${transcript}` },
+    ];
+
+    // Build API call options for Responses API
+    // Note: max_output_tokens includes BOTH reasoning tokens AND response tokens
+    const apiOptions: Record<string, unknown> = {
+      model: aiSettings.model,
+      input,
+      max_output_tokens: 4000, // Summaries need more tokens (reasoning + response)
+      // Add verbosity parameter (supported by Responses API)
+      text: {
+        verbosity: aiSettings.verbosity,
+      },
+    };
+
+    // Add reasoning parameter
+    // When 'none', we explicitly set effort to 'none' to disable reasoning
+    // Otherwise the API defaults to 'medium' reasoning
+    apiOptions.reasoning = {
+      effort: aiSettings.reasoning,
+    };
+
+    // Call OpenAI Responses API
+    console.log('🤖 Calling OpenAI Responses API for summary...');
+    const response = await openai.responses.create(
+      apiOptions as Parameters<typeof openai.responses.create>[0]
+    ) as OpenAI.Responses.Response;
+
+    // Extract output text from response
+    const summary = response.output_text;
 
     if (!summary) {
       throw new Error('OpenAI returned empty response');
     }
 
+    console.log('✅ Summary generated successfully');
     return summary.trim();
   } catch (error) {
     console.error('Error generating lesson summary:', error);
@@ -59,11 +100,6 @@ export async function generateLessonSummary(
   }
 }
 
-/**
- * Update a lesson with its generated summary
- * This is called after a lesson is created from a pending transcript
- * @param lessonId - The ID of the lesson to update
- */
 /**
  * Update a lesson with its generated summary
  * This is called after a lesson is created from a pending transcript
@@ -106,7 +142,7 @@ export async function generateAndUpdateLessonSummary(
       where: { id: lessonId },
       data: {
         summary,
-        summaryStatus: 'COMPLETED',  // ADD THIS LINE
+        summaryStatus: 'COMPLETED',
       },
     });
 
@@ -117,7 +153,7 @@ export async function generateAndUpdateLessonSummary(
     // Mark as FAILED so UI can show appropriate message
     await prisma.lesson.update({
       where: { id: lessonId },
-      data: { summaryStatus: 'FAILED' },  // ADD THIS BLOCK
+      data: { summaryStatus: 'FAILED' },
     }).catch(err => {
       console.error(`Failed to mark lesson ${lessonId} as FAILED:`, err);
     });

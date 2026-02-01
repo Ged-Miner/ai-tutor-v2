@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { createCourseSchema } from '@/lib/validations/course';
 import { Prisma } from '@prisma/client';
+import { generateCourseCode } from '@/lib/utils/generate-course-code';
 
 /**
  * GET /api/teacher/courses
@@ -122,6 +123,9 @@ export async function POST(request: Request) {
       courseTeacherId = session.user.id;
     }
 
+    // Generate unique course code
+    const courseCode = await generateCourseCode();
+
     // Create course
     const course = await prisma.course.create({
       data: {
@@ -129,6 +133,7 @@ export async function POST(request: Request) {
         description: description || null,
         settings: settings ? settings : Prisma.JsonNull,
         teacherId: courseTeacherId,
+        courseCode,
       },
       include: {
         teacher: {

@@ -47,7 +47,6 @@ export async function GET(request: NextRequest) {
         email: true,
         name: true,
         role: true,
-        teacherCode: true,
         createdAt: true,
         updatedAt: true,
         _count: {
@@ -110,7 +109,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { email, name, password, role, teacherCode } = validationResult.data;
+    const { email, name, password, role } = validationResult.data;
 
     // Check if email already exists
     const existingUser = await prisma.user.findUnique({
@@ -124,31 +123,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If role is TEACHER, validate teacherCode
-    if (role === 'TEACHER') {
-      if (!teacherCode) {
-        return NextResponse.json(
-          { error: 'Teacher code is required for teachers' },
-          { status: 400 }
-        );
-      }
-
-      // Check if teacherCode already exists
-      const existingTeacherCode = await prisma.user.findUnique({
-        where: { teacherCode },
-      });
-
-      if (existingTeacherCode) {
-        return NextResponse.json(
-          { error: 'Teacher code already exists' },
-          { status: 409 }
-        );
-      }
-    }
-
-    // If role is not TEACHER, teacherCode should be null
-    const finalTeacherCode = role === 'TEACHER' ? teacherCode : null;
-
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -159,14 +133,12 @@ export async function POST(request: NextRequest) {
         name,
         password: hashedPassword,
         role,
-        teacherCode: finalTeacherCode,
       },
       select: {
         id: true,
         email: true,
         name: true,
         role: true,
-        teacherCode: true,
         createdAt: true,
         updatedAt: true,
       },

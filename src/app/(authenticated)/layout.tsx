@@ -21,7 +21,7 @@ export default async function AuthenticatedLayout({
 
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto min-h-0">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 h-full">
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8 h-full">
           {children}
         </div>
       </main>

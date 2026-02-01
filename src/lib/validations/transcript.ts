@@ -5,10 +5,11 @@ import { z } from 'zod';
  * This matches the JSON format
  */
 export const uploadTranscriptSchema = z.object({
-  teacherCode: z
+  courseCode: z
     .string()
-    .min(1, 'Teacher code is required')
-    .regex(/^TEACH\d{3}$/, 'Invalid teacher code format (expected: TEACH###)'),
+    .min(1, 'Course code is required')
+    .length(4, 'Course code must be exactly 4 digits')
+    .regex(/^[0-9]{4}$/, 'Course code must be 4 digits'),
 
   courseName: z
     .string()

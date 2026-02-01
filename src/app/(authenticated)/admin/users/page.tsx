@@ -24,7 +24,6 @@ export default async function AdminUsersPage() {
       email: true,
       name: true,
       role: true,
-      teacherCode: true,
       createdAt: true,
       _count: {
         select: {

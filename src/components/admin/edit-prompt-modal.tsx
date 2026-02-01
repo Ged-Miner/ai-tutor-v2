@@ -118,7 +118,7 @@ export default function EditPromptModal({ isOpen, onClose, prompt }: EditPromptM
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-150 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit System Prompt</DialogTitle>
           <DialogDescription>
@@ -170,7 +170,7 @@ export default function EditPromptModal({ isOpen, onClose, prompt }: EditPromptM
             <Textarea
               {...register('content')}
               id="content"
-              rows={12}
+              rows={8} /* reduced from 12 */
               placeholder="Enter the system prompt content..."
               className={errors.content ? 'border-destructive' : ''}
             />

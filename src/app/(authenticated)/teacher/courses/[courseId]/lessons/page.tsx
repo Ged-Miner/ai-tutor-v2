@@ -74,6 +74,9 @@ export default async function CourseLessonsPage({ params }: PageProps) {
           <p className="mt-2 text-sm text-gray-600">
             {course.description || 'No description'}
           </p>
+          <p className="mt-4 rounded bg-gray-200 border border-gray-300 px-2 py-1 text-sm font-mono text-gray-900">
+            Course Code: <span className="font-mono font-medium">{course.courseCode}</span>
+          </p>
         </div>
         {/* <div className="flex gap-3">
           <Link href="/teacher/courses">

@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
-import { generateLessonCode } from '@/lib/utils/generate-lesson-code';
 import { generateAndUpdateLessonSummary } from '@/lib/openai-summary';
 
 // Validation schema for processing request
@@ -93,9 +92,6 @@ export async function POST(
       );
     }
 
-    // Generate unique lesson code
-    const lessonCode = await generateLessonCode();
-
     // Get the next position for this course
     const lastLesson = await prisma.lesson.findFirst({
       where: { courseId },
@@ -110,7 +106,6 @@ export async function POST(
         rawTranscript: pendingTranscript.rawTranscript,
         summary: null, // Will be generated asynchronously
         summaryStatus: 'GENERATING',
-        lessonCode,
         position,
         courseId,
       },
@@ -133,7 +128,6 @@ export async function POST(
       lesson: {
         id: lesson.id,
         title: lesson.title,
-        lessonCode: lesson.lessonCode,
         courseId: lesson.courseId,
       },
     }, { status: 201 });

@@ -50,13 +50,11 @@ export default async function StudentLessonPage({ params }: PageProps) {
     notFound();
   }
 
-  // Fetch or create chat session for this student and lesson
-  let chatSession = await prisma.chatSession.findUnique({
+  // Fetch all chat sessions for this student and lesson
+  let chatSessions = await prisma.chatSession.findMany({
     where: {
-      lessonId_studentId: {
-        lessonId: lesson.id,
-        studentId: session.user.id,
-      },
+      lessonId: lesson.id,
+      studentId: session.user.id,
     },
     include: {
       messages: {
@@ -64,21 +62,36 @@ export default async function StudentLessonPage({ params }: PageProps) {
           createdAt: 'asc',
         },
       },
+      _count: {
+        select: { messages: true },
+      },
     },
+    orderBy: { createdAt: 'asc' },
   });
 
-  // If no chat session exists, create one
-  if (!chatSession) {
-    chatSession = await prisma.chatSession.create({
+  // If no chat sessions exist, create the first one
+  if (chatSessions.length === 0) {
+    const newSession = await prisma.chatSession.create({
       data: {
         lessonId: lesson.id,
         studentId: session.user.id,
+        name: 'Chat 1',
       },
       include: {
         messages: true,
+        _count: {
+          select: { messages: true },
+        },
       },
     });
+    chatSessions = [newSession];
   }
+
+  // Fetch chatbot AI settings for maxMessagesPerChat
+  const chatbotSettings = await prisma.aISettings.findUnique({
+    where: { type: 'CHATBOT' },
+  });
+  const maxMessagesPerChat = chatbotSettings?.maxMessagesPerChat ?? null;
 
   return (
     <div className="flex flex-col h-full -m-4 sm:-m-6 lg:-m-8">
@@ -101,7 +114,6 @@ export default async function StudentLessonPage({ params }: PageProps) {
           <span>/</span>
           <span className="text-foreground">{lesson.title}</span>
         </div>
-        <h1 className="text-2xl font-bold">{lesson.title}</h1>
       </div>
 
       {/* Responsive Layout - Tabs on mobile, two-panel on desktop */}
@@ -110,7 +122,8 @@ export default async function StudentLessonPage({ params }: PageProps) {
         studentId={session.user.id}
         lessonTitle={lesson.title}
         lessonSummary={lesson.summary}
-        initialMessages={chatSession.messages}
+        initialSessions={chatSessions}
+        maxMessagesPerChat={maxMessagesPerChat}
       />
     </div>
   );

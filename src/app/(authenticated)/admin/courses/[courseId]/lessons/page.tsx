@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { CreateLessonButton } from '@/components/teacher/create-lesson-button';
 import { LessonsTable } from '@/components/teacher/lessons-table';
-import { Button } from '@/components/ui/button';
+// import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 interface PageProps {
@@ -84,13 +84,16 @@ export default async function AdminCourseLessonsPage({ params }: PageProps) {
           <p className="mt-1 text-xs text-gray-500">
             Teacher: {course.teacher.name || course.teacher.email}
           </p>
+          <p className="mt-4 rounded bg-gray-200 border border-gray-300 px-2 py-1 text-sm font-mono text-gray-900">
+            Course Code: <span className="font-mono font-medium">{course.courseCode}</span>
+          </p>
         </div>
-        <div className="flex gap-3">
+        {/* <div className="flex gap-3">
           <Link href="/admin/courses">
             <Button variant="outline">Back to Courses</Button>
           </Link>
           <CreateLessonButton courseId={courseId} />
-        </div>
+        </div> */}
       </div>
 
       {/* Stats Cards */}

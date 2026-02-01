@@ -15,7 +15,6 @@ model User {
   emailVerified DateTime?
   image         String?
   role          Role      @default(STUDENT)
-  teacherCode   String?   @unique
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   accounts      Account[]
@@ -72,6 +71,7 @@ model VerificationToken {
 model Course {
   id          String    @id @default(cuid())
   teacherId   String
+  courseCode  String    @unique
   name        String
   description String?
   settings    Json?
@@ -83,6 +83,7 @@ model Course {
   enrollments Enrollment[]
 
   @@index([teacherId])
+  @@index([courseCode])
   @@map("courses")
 }
 
@@ -93,7 +94,6 @@ model Lesson {
   rawTranscript String    @db.Text
   summary       String?   @db.Text
   summaryStatus SummaryStatus @default(NOT_STARTED)
-  lessonCode    String    @unique
   position      Int
   customPrompt  String?   @db.Text
   createdAt     DateTime  @default(now())
@@ -103,7 +103,6 @@ model Lesson {
   chatSessions  ChatSession[]
 
   @@index([courseId])
-  @@index([lessonCode])
   @@map("lessons")
 }
 
@@ -126,6 +125,7 @@ model ChatSession {
   id        String    @id @default(cuid())
   lessonId  String
   studentId String
+  name      String    @default("Chat 1")
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
@@ -133,9 +133,9 @@ model ChatSession {
   student   User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
   messages  Message[]
 
-  @@unique([lessonId, studentId])
   @@index([lessonId])
   @@index([studentId])
+  @@index([lessonId, studentId])
   @@map("chat_sessions")
 }
 
@@ -161,7 +161,7 @@ enum MessageRole {
 model PendingTranscript {
   id              String   @id @default(cuid())
   teacherId       String
-  teacherCode     String
+  courseCode      String
   courseName      String
   lessonTitle     String
   rawTranscript   String   @db.Text
@@ -173,7 +173,7 @@ model PendingTranscript {
   teacher         User     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
   @@index([teacherId])
-  @@index([teacherCode])
+  @@index([courseCode])
   @@index([processed])
   @@map("pending_transcripts")
 }
@@ -201,4 +201,24 @@ enum SummaryStatus {
   GENERATING     // AI is actively generating
   COMPLETED      // Summary has been generated
   FAILED         // Generation failed
+}
+
+// AI Settings for configuring OpenAI models
+model AISettings {
+  id                 String      @id @default(cuid())
+  type               AIType      @unique  // TRANSCRIPT or CHATBOT
+  model              String      @default("gpt-5-nano")
+  reasoning          String      @default("minimal")   // high, medium, low, minimal
+  verbosity          String      @default("medium") // high, medium, low
+  streaming          Boolean     @default(false)    // Enable streaming responses (chatbot only)
+  maxMessagesPerChat Int?                           // Max messages per chat session (null = unlimited, chatbot only)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  @@map("ai_settings")
+}
+
+enum AIType {
+  TRANSCRIPT  // For transcript summarization
+  CHATBOT     // For tutor chat responses
 }

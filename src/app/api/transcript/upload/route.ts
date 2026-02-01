@@ -7,7 +7,7 @@ import { applyRateLimit, transcriptUploadLimiter } from '@/lib/rate-limit';
 /**
  * CORS headers for transcript uploads
  * Allows requests from any source since the endpoint validates:
- * - teacherCode through database lookup
+ * - courseCode through database lookup
  * - Data structure through Zod schema validation
  * - Request rate limiting
  */
@@ -35,7 +35,7 @@ export async function OPTIONS(request: Request) {
 /**
  * POST /api/transcript/upload
  * Receive transcript uploads from any source (Chrome extension, web app, CLI tool, etc.)
- * Public endpoint (no auth) but validates teacherCode and applies rate limiting
+ * Public endpoint (no auth) but validates courseCode and applies rate limiting
  */
 export async function POST(request: Request) {
   const origin = request.headers.get('origin');
@@ -79,19 +79,22 @@ export async function POST(request: Request) {
       );
     }
 
-    const { teacherCode, courseName, lessonTitle, transcript, capturedAt, metadata } = validationResult.data;
+    const { courseCode, courseName, lessonTitle, transcript, capturedAt, metadata } = validationResult.data;
 
-    // Find teacher by teacher code
-    const teacher = await prisma.user.findUnique({
+    // Find course by course code
+    const course = await prisma.course.findUnique({
       where: {
-        teacherCode: teacherCode,
-        role: 'TEACHER',
+        courseCode: courseCode,
+      },
+      select: {
+        id: true,
+        teacherId: true,
       },
     });
 
-    if (!teacher) {
+    if (!course) {
       return NextResponse.json(
-        { error: 'Invalid teacher code - teacher not found' },
+        { error: 'Invalid course code - course not found' },
         {
           status: 404,
           headers: {
@@ -107,7 +110,8 @@ export async function POST(request: Request) {
 
     const existingPending = await prisma.pendingTranscript.findFirst({
       where: {
-        teacherId: teacher.id,
+        teacherId: course.teacherId,
+        courseCode: courseCode,
         courseName: {
           equals: courseName,
           mode: 'insensitive',
@@ -157,8 +161,8 @@ export async function POST(request: Request) {
       // CREATE NEW: No existing pending transcript found
       const newPending = await prisma.pendingTranscript.create({
         data: {
-          teacherId: teacher.id,
-          teacherCode,
+          teacherId: course.teacherId,
+          courseCode,
           courseName,
           lessonTitle,
           rawTranscript: transcript,

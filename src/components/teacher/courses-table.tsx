@@ -20,6 +20,7 @@ interface Course {
   id: string;
   name: string;
   description: string | null;
+  courseCode: string;
   createdAt: Date;
   _count: {
     lessons: number;
@@ -43,6 +44,7 @@ export function CoursesTable({ courses }: CoursesTableProps) {
           <TableHeader>
             <TableRow>
               <TableHead>Course Name</TableHead>
+              <TableHead>Course Code</TableHead>
               <TableHead>Lessons</TableHead>
               <TableHead>Students</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -52,6 +54,11 @@ export function CoursesTable({ courses }: CoursesTableProps) {
             {courses.map((course) => (
               <TableRow key={course.id}>
                 <TableCell className="font-medium">{course.name}</TableCell>
+                <TableCell>
+                  <code className="rounded bg-gray-100 px-2 py-1 text-sm font-mono text-gray-900">
+                    {course.courseCode}
+                  </code>
+                </TableCell>
                 <TableCell>{course._count.lessons}</TableCell>
                 <TableCell>{course._count.enrollments}</TableCell>
                 <TableCell className="text-right">
@@ -90,6 +97,11 @@ export function CoursesTable({ courses }: CoursesTableProps) {
             <div className="space-y-3">
               <div>
                 <h3 className="font-medium">{course.name}</h3>
+                <div className="mt-1">
+                  <code className="rounded bg-gray-100 px-2 py-1 text-xs font-mono text-gray-900">
+                    {course.courseCode}
+                  </code>
+                </div>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex gap-4 text-sm text-muted-foreground">

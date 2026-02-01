@@ -21,7 +21,6 @@ interface User {
   email: string;
   name: string | null;
   role: 'ADMIN' | 'TEACHER' | 'STUDENT';
-  teacherCode: string | null;
   createdAt: Date;
   _count: {
     courses: number;
