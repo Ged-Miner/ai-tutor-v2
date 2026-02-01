@@ -8,9 +8,8 @@ export const uploadTranscriptSchema = z.object({
   courseCode: z
     .string()
     .min(1, 'Course code is required')
-    .length(7, 'Course code must be exactly 7 characters')
-    .regex(/^[A-Z0-9]{7}$/, 'Invalid course code format')
-    .toUpperCase(),
+    .length(4, 'Course code must be exactly 4 digits')
+    .regex(/^[0-9]{4}$/, 'Course code must be 4 digits'),
 
   courseName: z
     .string()

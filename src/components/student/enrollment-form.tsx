@@ -97,12 +97,12 @@ export function EnrollmentForm() {
             <Input
               id="courseCode"
               {...register('courseCode')}
-              placeholder="A3X9K2M"
-              className="text-center text-lg font-mono uppercase tracking-wider"
-              maxLength={7}
+              placeholder="1234"
+              className="text-center text-lg font-mono tracking-wider"
+              maxLength={4}
             />
             <p className="text-xs text-muted-foreground">
-              Format: 7 uppercase letters and numbers (e.g., A3X9K2M)
+              Format: 4 digits (e.g., 1234)
             </p>
             {errors.courseCode && (
               <p className="text-sm text-red-600">

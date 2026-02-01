@@ -7,9 +7,8 @@ export const enrollmentSchema = z.object({
   courseCode: z
     .string()
     .min(1, 'Course code is required')
-    .length(7, 'Course code must be exactly 7 characters')
-    .regex(/^[A-Z0-9]{7}$/, 'Invalid course code format. Must be 7 uppercase letters/numbers')
-    .toUpperCase(),
+    .length(4, 'Course code must be exactly 4 digits')
+    .regex(/^[0-9]{4}$/, 'Course code must be 4 digits'),
 });
 
 // TypeScript type inferred from schema
