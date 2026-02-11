@@ -17,9 +17,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
 import {
   updateAISettingsSchema,
-  AI_MODELS,
+  SUGGESTED_MODELS,
   REASONING_LEVELS,
   VERBOSITY_LEVELS,
+  supportsNoneReasoning,
   type UpdateAISettingsInput,
 } from '@/lib/validations/ai-settings';
 
@@ -36,6 +37,22 @@ export function AISettingsForm({ initialSettings }: AISettingsFormProps) {
     resolver: zodResolver(updateAISettingsSchema),
     defaultValues: initialSettings,
   });
+
+  // Watch for incompatible model/reasoning combinations
+  const transcriptModel = form.watch('transcript.model');
+  const transcriptReasoning = form.watch('transcript.reasoning');
+  const chatbotModel = form.watch('chatbot.model');
+  const chatbotReasoning = form.watch('chatbot.reasoning');
+
+  const transcriptWarning =
+    transcriptReasoning === 'none' && !supportsNoneReasoning(transcriptModel)
+      ? `"${transcriptModel}" may not support 'none' reasoning. It will fall back to 'minimal' at runtime.`
+      : null;
+
+  const chatbotWarning =
+    chatbotReasoning === 'none' && !supportsNoneReasoning(chatbotModel)
+      ? `"${chatbotModel}" may not support 'none' reasoning. It will fall back to 'minimal' at runtime.`
+      : null;
 
   const onSubmit = async (data: UpdateAISettingsInput) => {
     setIsSubmitting(true);
@@ -75,21 +92,14 @@ export function AISettingsForm({ initialSettings }: AISettingsFormProps) {
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="space-y-2">
             <Label htmlFor="transcript-model">Model</Label>
-            <Select
-              value={form.watch('transcript.model')}
-              onValueChange={(value) => form.setValue('transcript.model', value as typeof AI_MODELS[number])}
-            >
-              <SelectTrigger id="transcript-model">
-                <SelectValue placeholder="Select model" />
-              </SelectTrigger>
-              <SelectContent>
-                {AI_MODELS.map((model) => (
-                  <SelectItem key={model} value={model}>
-                    {model}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Input
+              id="transcript-model"
+              placeholder="e.g., gpt-5-nano"
+              {...form.register('transcript.model')}
+            />
+            <p className="text-xs text-muted-foreground">
+              Example models: {SUGGESTED_MODELS.join(', ')}
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -130,6 +140,13 @@ export function AISettingsForm({ initialSettings }: AISettingsFormProps) {
             </Select>
           </div>
         </div>
+
+        {/* Transcript compatibility warning */}
+        {transcriptWarning && (
+          <Alert className="border-yellow-200 bg-yellow-50 text-yellow-900">
+            <AlertDescription>{transcriptWarning}</AlertDescription>
+          </Alert>
+        )}
       </div>
 
       {/* Chatbot AI Settings */}
@@ -142,21 +159,14 @@ export function AISettingsForm({ initialSettings }: AISettingsFormProps) {
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="space-y-2">
             <Label htmlFor="chatbot-model">Model</Label>
-            <Select
-              value={form.watch('chatbot.model')}
-              onValueChange={(value) => form.setValue('chatbot.model', value as typeof AI_MODELS[number])}
-            >
-              <SelectTrigger id="chatbot-model">
-                <SelectValue placeholder="Select model" />
-              </SelectTrigger>
-              <SelectContent>
-                {AI_MODELS.map((model) => (
-                  <SelectItem key={model} value={model}>
-                    {model}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Input
+              id="chatbot-model"
+              placeholder="e.g., gpt-5-nano"
+              {...form.register('chatbot.model')}
+            />
+            <p className="text-xs text-muted-foreground">
+              Example models: {SUGGESTED_MODELS.join(', ')}
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -198,6 +208,13 @@ export function AISettingsForm({ initialSettings }: AISettingsFormProps) {
           </div>
         </div>
 
+        {/* Chatbot compatibility warning */}
+        {chatbotWarning && (
+          <Alert className="border-yellow-200 bg-yellow-50 text-yellow-900">
+            <AlertDescription>{chatbotWarning}</AlertDescription>
+          </Alert>
+        )}
+
         {/* Streaming Toggle */}
         <div className="flex items-center justify-between rounded-lg border p-4 mt-4">
           <div className="space-y-0.5">
@@ -205,7 +222,7 @@ export function AISettingsForm({ initialSettings }: AISettingsFormProps) {
               Enable Streaming
             </Label>
             <p className="text-sm text-muted-foreground">
-              Stream AI responses in real-time as they are generated, rather than waiting for the complete response
+              Stream AI responses in real-time as they are generated rather than waiting for the complete response
             </p>
           </div>
           <Switch
