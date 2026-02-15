@@ -211,7 +211,7 @@ ai-tutor-v2/
 - Students enroll via teacher codes
 
 ### Lessons
-- Contains raw transcripts from Chrome extension
+- Contains raw transcripts
 - AI-generated summaries
 - Unique lesson codes
 - Ordered by position
@@ -315,7 +315,7 @@ docker compose restart
 - [ ] Phase 2: Authentication with NextAuth.js
 - [ ] Phase 3: Real-time chat with Socket.io
 - [ ] Phase 4: AI integration and transcript processing
-- [ ] Phase 5: Chrome extension integration
+- [ ] Phase 5: transcript import integration
 - [ ] Phase 6: Deployment to VPS
 
 ## Resources

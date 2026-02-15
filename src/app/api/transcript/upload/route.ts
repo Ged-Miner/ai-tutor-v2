@@ -34,7 +34,7 @@ export async function OPTIONS(request: Request) {
 
 /**
  * POST /api/transcript/upload
- * Receive transcript uploads from any source (Chrome extension, web app, CLI tool, etc.)
+ * Receive transcript uploads from any source
  * Public endpoint (no auth) but validates courseCode and applies rate limiting
  */
 export async function POST(request: Request) {

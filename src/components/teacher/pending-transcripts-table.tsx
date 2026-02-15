@@ -104,7 +104,7 @@ export function PendingTranscriptsTable() {
     return (
       <Alert>
         <AlertDescription>
-          No pending transcripts. Upload a transcript from the Chrome extension to get started.
+          No pending transcripts. Upload a transcript to get started.
         </AlertDescription>
       </Alert>
     );

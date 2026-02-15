@@ -116,8 +116,7 @@ export default function MockExtensionPage() {
           <CardHeader>
             <CardTitle>Transcript Upload Tester</CardTitle>
             <CardDescription>
-              Test transcript uploads to the system. This simulates uploads from any source
-              (Chrome extension, web app, voice typing tools, etc.)
+              Test transcript uploads to the system.
             </CardDescription>
           </CardHeader>
           <CardContent>

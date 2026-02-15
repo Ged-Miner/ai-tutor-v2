@@ -78,7 +78,7 @@ export function LessonFormModal({ courseId, onClose }: LessonFormModalProps) {
             <Input
               id="title"
               {...register('title')}
-              placeholder="Introduction to Thermodynamics"
+              placeholder="e.g. Reading and Writing"
             />
             {errors.title && (
               <p className="text-sm text-red-600">{errors.title.message}</p>
@@ -94,13 +94,13 @@ export function LessonFormModal({ courseId, onClose }: LessonFormModalProps) {
               id="rawTranscript"
               {...register('rawTranscript')}
               rows={10}
-              placeholder="Paste the lesson transcript here... (This will later come automatically from the Chrome extension)"
+              placeholder="Can be manually inputted or adjusted"
               className="font-mono text-sm"
             />
-            <p className="text-xs text-muted-foreground">
+            {/* <p className="text-xs text-muted-foreground">
               For now, paste lesson content manually. Later this will be
               automatically captured from your Google Doc.
-            </p>
+            </p> */}
             {errors.rawTranscript && (
               <p className="text-sm text-red-600">
                 {errors.rawTranscript.message}
@@ -115,11 +115,11 @@ export function LessonFormModal({ courseId, onClose }: LessonFormModalProps) {
               id="summary"
               {...register('summary')}
               rows={4}
-              placeholder="A brief summary of the lesson... (Will be AI-generated in the future)"
+              placeholder="A brief summary of the lesson; can be manually inputted or adjusted"
             />
-            <p className="text-xs text-muted-foreground">
+            {/* <p className="text-xs text-muted-foreground">
               Optional for now. Later, AI will automatically generate summaries.
-            </p>
+            </p> */}
             {errors.summary && (
               <p className="text-sm text-red-600">{errors.summary.message}</p>
             )}
@@ -134,10 +134,10 @@ export function LessonFormModal({ courseId, onClose }: LessonFormModalProps) {
               id="customPrompt"
               {...register('customPrompt')}
               rows={3}
-              placeholder="Custom instructions for the AI tutor for this specific lesson..."
+              placeholder="Custom instructions for the AI tutor regarding this specific lesson"
             />
             <p className="text-xs text-muted-foreground">
-              Override the default AI behavior for this lesson. Leave blank to
+              Appends the default AI behavior for this lesson. Leave blank to
               use your course defaults.
             </p>
             {errors.customPrompt && (

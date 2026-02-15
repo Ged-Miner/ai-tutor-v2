@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 /**
- * Schema for validating transcript uploads from Chrome extension
+ * Schema for validating transcript uploads
  * This matches the JSON format
  */
 export const uploadTranscriptSchema = z.object({

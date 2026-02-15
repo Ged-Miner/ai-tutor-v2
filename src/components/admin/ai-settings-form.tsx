@@ -32,6 +32,10 @@ export function AISettingsForm({ initialSettings }: AISettingsFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  // Local display state for max messages input (allows empty field while typing)
+  const [maxMessagesDisplay, setMaxMessagesDisplay] = useState(
+    initialSettings.chatbot.maxMessagesPerChat?.toString() ?? ''
+  );
 
   const form = useForm<UpdateAISettingsInput>({
     resolver: zodResolver(updateAISettingsSchema),
@@ -250,8 +254,10 @@ export function AISettingsForm({ initialSettings }: AISettingsFormProps) {
                   checked={form.watch('chatbot.maxMessagesPerChat') === null}
                   onCheckedChange={(checked) => {
                     if (checked) {
+                      setMaxMessagesDisplay('');
                       form.setValue('chatbot.maxMessagesPerChat', null);
                     } else {
+                      setMaxMessagesDisplay('50');
                       form.setValue('chatbot.maxMessagesPerChat', 50);
                     }
                   }}
@@ -264,12 +270,25 @@ export function AISettingsForm({ initialSettings }: AISettingsFormProps) {
                 <Input
                   id="chatbot-maxMessages"
                   type="number"
-                  min={1}
+                  min={0}
                   className="w-24"
-                  value={form.watch('chatbot.maxMessagesPerChat') ?? ''}
+                  value={maxMessagesDisplay}
                   onChange={(e) => {
-                    const value = e.target.value ? parseInt(e.target.value, 10) : null;
-                    form.setValue('chatbot.maxMessagesPerChat', value && value > 0 ? value : null);
+                    const raw = e.target.value;
+                    setMaxMessagesDisplay(raw);
+                    // Update form value when there's a valid positive number
+                    const parsed = parseInt(raw, 10);
+                    if (!isNaN(parsed) && parsed > 0) {
+                      form.setValue('chatbot.maxMessagesPerChat', parsed);
+                    }
+                  }}
+                  onBlur={() => {
+                    // On blur: if empty or 0, toggle to unlimited
+                    const parsed = parseInt(maxMessagesDisplay, 10);
+                    if (!maxMessagesDisplay || isNaN(parsed) || parsed <= 0) {
+                      setMaxMessagesDisplay('');
+                      form.setValue('chatbot.maxMessagesPerChat', null);
+                    }
                   }}
                 />
               )}
