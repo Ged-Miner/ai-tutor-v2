@@ -27,7 +27,7 @@ export default async function StudentEnrollPage() {
           How to Enroll:
         </h2>
         <ol className="mt-3 space-y-2 text-sm text-blue-800">
-          <li>1. Get a course code from your instructor (7-character code)</li>
+          <li>1. Get a course code from your instructor (4-character code)</li>
           <li>2. Enter the code below</li>
           <li>3. You&apos;ll be enrolled in that specific course</li>
           <li>4. Start learning!</li>

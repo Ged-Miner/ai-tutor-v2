@@ -136,7 +136,7 @@ export default function MockExtensionPage() {
                   className="font-mono"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Enter the 7-character course code (e.g., A3X9K2M). Find this in your course list.
+                  Enter the 4-character course code (e.g., 1234). Find this in your course list.
                 </p>
               </div>
 
@@ -280,8 +280,8 @@ export default function MockExtensionPage() {
                 Testing Instructions:
               </h3>
               <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-                <li>Create a course as a teacher or admin, and copy the 7-character course code</li>
-                <li>Paste the course code in the field above (e.g., A3X9K2M)</li>
+                <li>Create a course as a teacher or admin, and copy the 4-character course code</li>
+                <li>Paste the course code in the field above (e.g., 1234)</li>
                 <li>Fill in the course name and lesson title that match your course</li>
                 <li>The transcript is pre-filled with sample content - modify as needed</li>
                 <li>Click &quot;Upload Transcript&quot; to send it to the API</li>
