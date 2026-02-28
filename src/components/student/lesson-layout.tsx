@@ -120,6 +120,18 @@ export function LessonLayout({
     }
   }, [activeSessionId]);
 
+  // Update message count for the active session when messages are sent/received
+  const handleMessageCountChange = useCallback((delta: number) => {
+    if (!activeSessionId) return;
+    setChatSessions(prev =>
+      prev.map(s =>
+        s.id === activeSessionId
+          ? { ...s, _count: { ...s._count, messages: s._count.messages + delta } }
+          : s
+      )
+    );
+  }, [activeSessionId]);
+
   // Handle when message limit is reached - prompt to create new session
   const handleSessionLimitReached = useCallback(() => {
     const createNew = window.confirm(
@@ -156,6 +168,7 @@ export function LessonLayout({
       studentId={studentId}
       initialMessages={activeSession.messages}
       onSessionLimitReached={handleSessionLimitReached}
+      onMessageCountChange={handleMessageCountChange}
     />
   ) : (
     <div className="flex items-center justify-center h-full text-muted-foreground">

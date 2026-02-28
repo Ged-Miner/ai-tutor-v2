@@ -18,6 +18,7 @@ interface ChatInterfaceProps {
   studentId: string;
   initialMessages?: Message[];
   onSessionLimitReached?: () => void;
+  onMessageCountChange?: (delta: number) => void;
 }
 
 // Track streaming message state
@@ -26,7 +27,7 @@ interface StreamingMessage {
   content: string;
 }
 
-export function ChatInterface({ chatSessionId, studentId, initialMessages = [], onSessionLimitReached }: ChatInterfaceProps) {
+export function ChatInterface({ chatSessionId, studentId, initialMessages = [], onSessionLimitReached, onMessageCountChange }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -38,12 +39,18 @@ export function ChatInterface({ chatSessionId, studentId, initialMessages = [], 
 
   // Handle incoming messages from Socket.io (non-streaming)
   const handleMessageReceived = useCallback((message: Message) => {
+    let added = false;
     setMessages(prev => {
       // Avoid duplicates by checking if message already exists
       const exists = prev.some(m => m.id === message.id);
       if (exists) return prev;
+      added = true;
       return [...prev, message];
     });
+
+    if (added) {
+      onMessageCountChange?.(1);
+    }
 
     // If we just received the USER message we sent, now show loading
     if (message.role === 'USER' && awaitingUserMessage) {
@@ -54,7 +61,7 @@ export function ChatInterface({ chatSessionId, studentId, initialMessages = [], 
     else if (message.role === 'ASSISTANT') {
       setIsLoading(false);
     }
-  }, [awaitingUserMessage]);
+  }, [awaitingUserMessage, onMessageCountChange]);
 
   // Handle streaming start
   const handleStreamStart = useCallback(({ tempId }: { tempId: string; chatSessionId: string }) => {
@@ -81,12 +88,18 @@ export function ChatInterface({ chatSessionId, studentId, initialMessages = [], 
     });
 
     // Add the final message to the messages list
+    let added = false;
     setMessages(prev => {
       const exists = prev.some(m => m.id === message.id);
       if (exists) return prev;
+      added = true;
       return [...prev, message];
     });
-  }, []);
+
+    if (added) {
+      onMessageCountChange?.(1);
+    }
+  }, [onMessageCountChange]);
 
   // Handle message errors (including limit reached)
   const handleMessageError = useCallback((error: { error: string; code?: string; limit?: number }) => {
