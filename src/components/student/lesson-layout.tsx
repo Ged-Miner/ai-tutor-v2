@@ -120,13 +120,15 @@ export function LessonLayout({
     }
   }, [activeSessionId]);
 
-  // Update message count for the active session when messages are sent/received
-  const handleMessageCountChange = useCallback((delta: number) => {
+  // Sync messages from ChatInterface back to parent state so that:
+  // 1. Session selector badge count stays current
+  // 2. Switching sessions and back preserves message history
+  const handleMessagesChange = useCallback((messages: Pick<Message, 'id' | 'content' | 'role' | 'createdAt'>[]) => {
     if (!activeSessionId) return;
     setChatSessions(prev =>
       prev.map(s =>
         s.id === activeSessionId
-          ? { ...s, _count: { ...s._count, messages: s._count.messages + delta } }
+          ? { ...s, messages: messages as Message[], _count: { ...s._count, messages: messages.length } }
           : s
       )
     );
@@ -168,7 +170,7 @@ export function LessonLayout({
       studentId={studentId}
       initialMessages={activeSession.messages}
       onSessionLimitReached={handleSessionLimitReached}
-      onMessageCountChange={handleMessageCountChange}
+      onMessagesChange={handleMessagesChange}
     />
   ) : (
     <div className="flex items-center justify-center h-full text-muted-foreground">
