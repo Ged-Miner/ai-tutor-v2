@@ -15,7 +15,7 @@ export default async function AuthenticatedLayout({
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-dvh bg-gray-50">
       {/* Navigation */}
       <Navigation session={session} />
 
