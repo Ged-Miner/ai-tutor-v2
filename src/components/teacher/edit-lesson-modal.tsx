@@ -112,7 +112,7 @@ export function EditLessonModal({
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden min-w-0 break-all">
         <DialogHeader>
           <DialogTitle>Edit Lesson</DialogTitle>
         </DialogHeader>

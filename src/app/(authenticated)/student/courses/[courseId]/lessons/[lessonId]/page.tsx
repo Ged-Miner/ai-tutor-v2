@@ -94,7 +94,7 @@ export default async function StudentLessonPage({ params }: PageProps) {
   const maxMessagesPerChat = chatbotSettings?.maxMessagesPerChat ?? null;
 
   return (
-    <div className="flex flex-col h-full -m-4 sm:-m-6 lg:-m-8">
+    <div className="flex flex-col h-[calc(100%+2rem)] -mx-4 -my-4 sm:-mx-6 lg:-mx-8">
       {/* Header */}
       <div className="border-b bg-background px-6 py-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">

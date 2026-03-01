@@ -18,6 +18,7 @@ interface ChatInterfaceProps {
   studentId: string;
   initialMessages?: Message[];
   onSessionLimitReached?: () => void;
+  onMessagesChange?: (messages: Message[]) => void;
 }
 
 // Track streaming message state
@@ -26,7 +27,7 @@ interface StreamingMessage {
   content: string;
 }
 
-export function ChatInterface({ chatSessionId, studentId, initialMessages = [], onSessionLimitReached }: ChatInterfaceProps) {
+export function ChatInterface({ chatSessionId, studentId, initialMessages = [], onSessionLimitReached, onMessagesChange }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -35,6 +36,7 @@ export function ChatInterface({ chatSessionId, studentId, initialMessages = [], 
   const [limitReached, setLimitReached] = useState(false);
   const [messageError, setMessageError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Handle incoming messages from Socket.io (non-streaming)
   const handleMessageReceived = useCallback((message: Message) => {
@@ -115,6 +117,19 @@ export function ChatInterface({ chatSessionId, studentId, initialMessages = [], 
     onMessageError: handleMessageError,
   });
 
+  // Sync messages back to parent so session selector count stays current
+  // and switching sessions preserves message history
+  useEffect(() => {
+    onMessagesChange?.(messages);
+  }, [messages, onMessagesChange]);
+
+  // Refocus the textarea when the AI finishes responding (textarea was disabled while loading)
+  useEffect(() => {
+    if (!isLoading && !limitReached) {
+      textareaRef.current?.focus();
+    }
+  }, [isLoading, limitReached]);
+
   // Auto-scroll to bottom when new messages arrive or streaming content updates
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -141,6 +156,9 @@ export function ChatInterface({ chatSessionId, studentId, initialMessages = [], 
 
     // Note: Message will appear when server broadcasts it back via 'receive_message'
     // Loading state will be set to true when USER message is received
+
+    // Refocus immediately for the brief window before the textarea becomes disabled
+    textareaRef.current?.focus();
   };
 
   return (
@@ -219,7 +237,7 @@ export function ChatInterface({ chatSessionId, studentId, initialMessages = [], 
       </div>
 
       {/* Input Area */}
-      <div className="border-t p-4">
+      <div className="border-t p-4" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
         {limitReached ? (
           <div className="text-center text-muted-foreground py-2">
             <p className="text-sm">This chat session has reached its message limit. Please create a new chat.</p>
@@ -228,6 +246,7 @@ export function ChatInterface({ chatSessionId, studentId, initialMessages = [], 
           <>
             <form onSubmit={handleSubmit} className="flex gap-2">
               <Textarea
+                ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -239,6 +258,7 @@ export function ChatInterface({ chatSessionId, studentId, initialMessages = [], 
                 placeholder="Ask a question about this lesson..."
                 className="min-h-15 max-h-50 resize-none"
                 disabled={isLoading || !isConnected}
+                onFocus={() => textareaRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })}
               />
               <Button
                 type="submit"

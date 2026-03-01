@@ -1,13 +1,14 @@
 import OpenAI from 'openai';
 import { prisma } from './prisma';
+import { FALLBACK_MODEL, FALLBACK_REASONING } from './validations/ai-settings';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Default AI settings
+// Default AI settings (uses the centralized fallback model)
 const DEFAULT_CHATBOT_SETTINGS = {
-  model: 'gpt-5-nano',
+  model: FALLBACK_MODEL,
   reasoning: 'minimal',
   verbosity: 'medium',
   streaming: false,
@@ -25,6 +26,34 @@ export async function getChatbotSettings() {
     verbosity: settings?.verbosity ?? DEFAULT_CHATBOT_SETTINGS.verbosity,
     streaming: settings?.streaming ?? DEFAULT_CHATBOT_SETTINGS.streaming,
   };
+}
+
+// Helper to check if an error is model-related (invalid model name, etc.)
+function isModelError(error: unknown): boolean {
+  if (error instanceof OpenAI.APIError) {
+    const message = error.message.toLowerCase();
+    return (
+      error.status === 404 ||
+      (message.includes('model') && !message.includes('reasoning')) ||
+      message.includes('does not exist') ||
+      message.includes('not found')
+    );
+  }
+  return false;
+}
+
+// Helper to check if an error is reasoning-related (unsupported reasoning level)
+function isReasoningError(error: unknown): boolean {
+  if (error instanceof OpenAI.APIError) {
+    const message = error.message.toLowerCase();
+    return (
+      error.status === 400 &&
+      (message.includes('reasoning') ||
+        message.includes("'none' is not supported") ||
+        message.includes('unsupported value'))
+    );
+  }
+  return false;
 }
 
 interface GenerateResponseParams {
@@ -148,11 +177,39 @@ Use the above lesson content to answer the student's questions. Base your answer
       effort: aiSettings.reasoning,
     };
 
-    // Call OpenAI Responses API
-    console.log('🤖 Calling OpenAI Responses API...');
-    const response = await openai.responses.create(
-      apiOptions as Parameters<typeof openai.responses.create>[0]
-    ) as OpenAI.Responses.Response;
+    // Call OpenAI Responses API with model and reasoning fallbacks
+    console.log(`🤖 Calling OpenAI Responses API with model: ${apiOptions.model}, reasoning: ${(apiOptions.reasoning as { effort: string }).effort}...`);
+
+    let response: OpenAI.Responses.Response;
+    try {
+      response = await openai.responses.create(
+        apiOptions as Parameters<typeof openai.responses.create>[0]
+      ) as OpenAI.Responses.Response;
+    } catch (apiError) {
+      // If the model is invalid, fall back to the default model
+      if (isModelError(apiError) && apiOptions.model !== FALLBACK_MODEL) {
+        console.warn(`⚠️ Model "${apiOptions.model}" failed, falling back to ${FALLBACK_MODEL}`);
+        console.warn(`   Error was: ${apiError instanceof Error ? apiError.message : 'Unknown error'}`);
+
+        apiOptions.model = FALLBACK_MODEL;
+        response = await openai.responses.create(
+          apiOptions as Parameters<typeof openai.responses.create>[0]
+        ) as OpenAI.Responses.Response;
+      }
+      // If reasoning level is unsupported, fall back to minimal
+      else if (isReasoningError(apiError) && (apiOptions.reasoning as { effort: string }).effort !== FALLBACK_REASONING) {
+        const originalReasoning = (apiOptions.reasoning as { effort: string }).effort;
+        console.warn(`⚠️ Reasoning "${originalReasoning}" not supported by model "${apiOptions.model}", falling back to ${FALLBACK_REASONING}`);
+        console.warn(`   Error was: ${apiError instanceof Error ? apiError.message : 'Unknown error'}`);
+
+        (apiOptions.reasoning as { effort: string }).effort = FALLBACK_REASONING;
+        response = await openai.responses.create(
+          apiOptions as Parameters<typeof openai.responses.create>[0]
+        ) as OpenAI.Responses.Response;
+      } else {
+        throw apiError;
+      }
+    }
 
     // Debug: log the full response structure
     console.log('📦 Response object keys:', Object.keys(response));
@@ -271,11 +328,39 @@ Use the above lesson content to answer the student's questions. Base your answer
       },
     };
 
-    // Call OpenAI Responses API with streaming
-    console.log('🤖 [Streaming] Calling OpenAI Responses API...');
-    const stream = await openai.responses.create(
-      apiOptions as Parameters<typeof openai.responses.create>[0]
-    );
+    // Call OpenAI Responses API with streaming and model/reasoning fallbacks
+    console.log(`🤖 [Streaming] Calling OpenAI Responses API with model: ${apiOptions.model}, reasoning: ${(apiOptions.reasoning as { effort: string }).effort}...`);
+
+    let stream;
+    try {
+      stream = await openai.responses.create(
+        apiOptions as Parameters<typeof openai.responses.create>[0]
+      );
+    } catch (apiError) {
+      // If the model is invalid, fall back to the default model
+      if (isModelError(apiError) && apiOptions.model !== FALLBACK_MODEL) {
+        console.warn(`⚠️ [Streaming] Model "${apiOptions.model}" failed, falling back to ${FALLBACK_MODEL}`);
+        console.warn(`   Error was: ${apiError instanceof Error ? apiError.message : 'Unknown error'}`);
+
+        apiOptions.model = FALLBACK_MODEL;
+        stream = await openai.responses.create(
+          apiOptions as Parameters<typeof openai.responses.create>[0]
+        );
+      }
+      // If reasoning level is unsupported, fall back to minimal
+      else if (isReasoningError(apiError) && (apiOptions.reasoning as { effort: string }).effort !== FALLBACK_REASONING) {
+        const originalReasoning = (apiOptions.reasoning as { effort: string }).effort;
+        console.warn(`⚠️ [Streaming] Reasoning "${originalReasoning}" not supported by model "${apiOptions.model}", falling back to ${FALLBACK_REASONING}`);
+        console.warn(`   Error was: ${apiError instanceof Error ? apiError.message : 'Unknown error'}`);
+
+        (apiOptions.reasoning as { effort: string }).effort = FALLBACK_REASONING;
+        stream = await openai.responses.create(
+          apiOptions as Parameters<typeof openai.responses.create>[0]
+        );
+      } else {
+        throw apiError;
+      }
+    }
 
     let fullContent = '';
 

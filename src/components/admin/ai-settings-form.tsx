@@ -17,9 +17,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
 import {
   updateAISettingsSchema,
-  AI_MODELS,
+  SUGGESTED_MODELS,
   REASONING_LEVELS,
   VERBOSITY_LEVELS,
+  supportsNoneReasoning,
   type UpdateAISettingsInput,
 } from '@/lib/validations/ai-settings';
 
@@ -31,11 +32,31 @@ export function AISettingsForm({ initialSettings }: AISettingsFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  // Local display state for max messages input (allows empty field while typing)
+  const [maxMessagesDisplay, setMaxMessagesDisplay] = useState(
+    initialSettings.chatbot.maxMessagesPerChat?.toString() ?? ''
+  );
 
   const form = useForm<UpdateAISettingsInput>({
     resolver: zodResolver(updateAISettingsSchema),
     defaultValues: initialSettings,
   });
+
+  // Watch for incompatible model/reasoning combinations
+  const transcriptModel = form.watch('transcript.model');
+  const transcriptReasoning = form.watch('transcript.reasoning');
+  const chatbotModel = form.watch('chatbot.model');
+  const chatbotReasoning = form.watch('chatbot.reasoning');
+
+  const transcriptWarning =
+    transcriptReasoning === 'none' && !supportsNoneReasoning(transcriptModel)
+      ? `"${transcriptModel}" may not support 'none' reasoning. It will fall back to 'minimal' at runtime.`
+      : null;
+
+  const chatbotWarning =
+    chatbotReasoning === 'none' && !supportsNoneReasoning(chatbotModel)
+      ? `"${chatbotModel}" may not support 'none' reasoning. It will fall back to 'minimal' at runtime.`
+      : null;
 
   const onSubmit = async (data: UpdateAISettingsInput) => {
     setIsSubmitting(true);
@@ -75,21 +96,14 @@ export function AISettingsForm({ initialSettings }: AISettingsFormProps) {
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="space-y-2">
             <Label htmlFor="transcript-model">Model</Label>
-            <Select
-              value={form.watch('transcript.model')}
-              onValueChange={(value) => form.setValue('transcript.model', value as typeof AI_MODELS[number])}
-            >
-              <SelectTrigger id="transcript-model">
-                <SelectValue placeholder="Select model" />
-              </SelectTrigger>
-              <SelectContent>
-                {AI_MODELS.map((model) => (
-                  <SelectItem key={model} value={model}>
-                    {model}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Input
+              id="transcript-model"
+              placeholder="e.g., gpt-5-nano"
+              {...form.register('transcript.model')}
+            />
+            <p className="text-xs text-muted-foreground">
+              Example models: {SUGGESTED_MODELS.join(', ')}
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -130,6 +144,13 @@ export function AISettingsForm({ initialSettings }: AISettingsFormProps) {
             </Select>
           </div>
         </div>
+
+        {/* Transcript compatibility warning */}
+        {transcriptWarning && (
+          <Alert className="border-yellow-200 bg-yellow-50 text-yellow-900">
+            <AlertDescription>{transcriptWarning}</AlertDescription>
+          </Alert>
+        )}
       </div>
 
       {/* Chatbot AI Settings */}
@@ -142,21 +163,14 @@ export function AISettingsForm({ initialSettings }: AISettingsFormProps) {
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="space-y-2">
             <Label htmlFor="chatbot-model">Model</Label>
-            <Select
-              value={form.watch('chatbot.model')}
-              onValueChange={(value) => form.setValue('chatbot.model', value as typeof AI_MODELS[number])}
-            >
-              <SelectTrigger id="chatbot-model">
-                <SelectValue placeholder="Select model" />
-              </SelectTrigger>
-              <SelectContent>
-                {AI_MODELS.map((model) => (
-                  <SelectItem key={model} value={model}>
-                    {model}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Input
+              id="chatbot-model"
+              placeholder="e.g., gpt-5-nano"
+              {...form.register('chatbot.model')}
+            />
+            <p className="text-xs text-muted-foreground">
+              Example models: {SUGGESTED_MODELS.join(', ')}
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -198,6 +212,13 @@ export function AISettingsForm({ initialSettings }: AISettingsFormProps) {
           </div>
         </div>
 
+        {/* Chatbot compatibility warning */}
+        {chatbotWarning && (
+          <Alert className="border-yellow-200 bg-yellow-50 text-yellow-900">
+            <AlertDescription>{chatbotWarning}</AlertDescription>
+          </Alert>
+        )}
+
         {/* Streaming Toggle */}
         <div className="flex items-center justify-between rounded-lg border p-4 mt-4">
           <div className="space-y-0.5">
@@ -205,7 +226,7 @@ export function AISettingsForm({ initialSettings }: AISettingsFormProps) {
               Enable Streaming
             </Label>
             <p className="text-sm text-muted-foreground">
-              Stream AI responses in real-time as they are generated, rather than waiting for the complete response
+              Stream AI responses in real-time as they are generated rather than waiting for the complete response
             </p>
           </div>
           <Switch
@@ -233,8 +254,10 @@ export function AISettingsForm({ initialSettings }: AISettingsFormProps) {
                   checked={form.watch('chatbot.maxMessagesPerChat') === null}
                   onCheckedChange={(checked) => {
                     if (checked) {
+                      setMaxMessagesDisplay('');
                       form.setValue('chatbot.maxMessagesPerChat', null);
                     } else {
+                      setMaxMessagesDisplay('50');
                       form.setValue('chatbot.maxMessagesPerChat', 50);
                     }
                   }}
@@ -247,12 +270,25 @@ export function AISettingsForm({ initialSettings }: AISettingsFormProps) {
                 <Input
                   id="chatbot-maxMessages"
                   type="number"
-                  min={1}
+                  min={0}
                   className="w-24"
-                  value={form.watch('chatbot.maxMessagesPerChat') ?? ''}
+                  value={maxMessagesDisplay}
                   onChange={(e) => {
-                    const value = e.target.value ? parseInt(e.target.value, 10) : null;
-                    form.setValue('chatbot.maxMessagesPerChat', value && value > 0 ? value : null);
+                    const raw = e.target.value;
+                    setMaxMessagesDisplay(raw);
+                    // Update form value when there's a valid positive number
+                    const parsed = parseInt(raw, 10);
+                    if (!isNaN(parsed) && parsed > 0) {
+                      form.setValue('chatbot.maxMessagesPerChat', parsed);
+                    }
+                  }}
+                  onBlur={() => {
+                    // On blur: if empty or 0, toggle to unlimited
+                    const parsed = parseInt(maxMessagesDisplay, 10);
+                    if (!maxMessagesDisplay || isNaN(parsed) || parsed <= 0) {
+                      setMaxMessagesDisplay('');
+                      form.setValue('chatbot.maxMessagesPerChat', null);
+                    }
                   }}
                 />
               )}

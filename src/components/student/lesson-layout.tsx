@@ -120,6 +120,20 @@ export function LessonLayout({
     }
   }, [activeSessionId]);
 
+  // Sync messages from ChatInterface back to parent state so that:
+  // 1. Session selector badge count stays current
+  // 2. Switching sessions and back preserves message history
+  const handleMessagesChange = useCallback((messages: Pick<Message, 'id' | 'content' | 'role' | 'createdAt'>[]) => {
+    if (!activeSessionId) return;
+    setChatSessions(prev =>
+      prev.map(s =>
+        s.id === activeSessionId
+          ? { ...s, messages: messages as Message[], _count: { ...s._count, messages: messages.length } }
+          : s
+      )
+    );
+  }, [activeSessionId]);
+
   // Handle when message limit is reached - prompt to create new session
   const handleSessionLimitReached = useCallback(() => {
     const createNew = window.confirm(
@@ -156,6 +170,7 @@ export function LessonLayout({
       studentId={studentId}
       initialMessages={activeSession.messages}
       onSessionLimitReached={handleSessionLimitReached}
+      onMessagesChange={handleMessagesChange}
     />
   ) : (
     <div className="flex items-center justify-center h-full text-muted-foreground">
