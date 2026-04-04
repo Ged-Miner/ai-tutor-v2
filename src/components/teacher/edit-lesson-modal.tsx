@@ -112,7 +112,7 @@ export function EditLessonModal({
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden min-w-0 break-all">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden min-w-0">
         <DialogHeader>
           <DialogTitle>Edit Lesson</DialogTitle>
         </DialogHeader>
@@ -138,7 +138,7 @@ export function EditLessonModal({
               id="rawTranscript"
               {...register('rawTranscript')}
               rows={10}
-              className="font-mono text-sm"
+              className="font-mono text-sm wrap-anywhere"
             />
             {errors.rawTranscript && (
               <p className="text-sm text-red-600">
@@ -187,7 +187,7 @@ export function EditLessonModal({
                     id="summary"
                     {...register('summary')}
                     rows={6}
-                    className="font-sans text-sm mt-2"
+                    className="font-sans text-sm mt-2 wrap-anywhere"
                     placeholder="Write your summary here..."
                   />
                 </AlertDescription>
@@ -199,7 +199,7 @@ export function EditLessonModal({
                   id="summary"
                   {...register('summary')}
                   rows={6}
-                  className="font-sans text-sm"
+                  className="font-sans text-sm wrap-anywhere"
                   placeholder={lesson.summaryStatus === 'NOT_STARTED' ? 'Write your lesson summary here...' : ''}
                 />
                 {errors.summary && (
@@ -217,6 +217,7 @@ export function EditLessonModal({
               {...register('customPrompt')}
               rows={3}
               placeholder="Override the default AI tutor prompt for this specific lesson..."
+              className="wrap-anywhere"
             />
             {errors.customPrompt && (
               <p className="text-sm text-red-600">

@@ -64,7 +64,7 @@ export function LessonFormModal({ courseId, onClose }: LessonFormModalProps) {
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden min-w-0">
         <DialogHeader>
           <DialogTitle>Create New Lesson</DialogTitle>
         </DialogHeader>
@@ -95,7 +95,7 @@ export function LessonFormModal({ courseId, onClose }: LessonFormModalProps) {
               {...register('rawTranscript')}
               rows={10}
               placeholder="Can be manually inputted or adjusted"
-              className="font-mono text-sm"
+              className="font-mono text-sm wrap-anywhere"
             />
             {/* <p className="text-xs text-muted-foreground">
               For now, paste lesson content manually. Later this will be
@@ -116,6 +116,7 @@ export function LessonFormModal({ courseId, onClose }: LessonFormModalProps) {
               {...register('summary')}
               rows={4}
               placeholder="A brief summary of the lesson; can be manually inputted or adjusted"
+              className="wrap-anywhere"
             />
             {/* <p className="text-xs text-muted-foreground">
               Optional for now. Later, AI will automatically generate summaries.
@@ -135,6 +136,7 @@ export function LessonFormModal({ courseId, onClose }: LessonFormModalProps) {
               {...register('customPrompt')}
               rows={3}
               placeholder="Custom instructions for the AI tutor regarding this specific lesson"
+              className="wrap-anywhere"
             />
             <p className="text-xs text-muted-foreground">
               Appends the default AI behavior for this lesson. Leave blank to
