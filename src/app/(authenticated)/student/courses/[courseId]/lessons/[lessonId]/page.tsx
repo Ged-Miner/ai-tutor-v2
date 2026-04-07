@@ -51,7 +51,7 @@ export default async function StudentLessonPage({ params }: PageProps) {
   }
 
   // Fetch all chat sessions for this student and lesson
-  let chatSessions = await prisma.chatSession.findMany({
+  const chatSessions = await prisma.chatSession.findMany({
     where: {
       lessonId: lesson.id,
       studentId: session.user.id,
