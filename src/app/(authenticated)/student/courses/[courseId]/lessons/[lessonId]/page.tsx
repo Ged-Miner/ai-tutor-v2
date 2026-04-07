@@ -66,16 +66,17 @@ export default async function StudentLessonPage({ params }: PageProps) {
         select: { messages: true },
       },
     },
-    orderBy: { createdAt: 'asc' },
+    orderBy: { createdAt: 'desc' },
   });
 
-  // If no chat sessions exist, create the first one
-  if (chatSessions.length === 0) {
+  // Create a new session if none exist, or if the most recent session already has messages.
+  // Reusing an existing empty session avoids orphaned sessions when a student visits without chatting.
+  if (chatSessions.length === 0 || chatSessions[0]._count.messages > 0) {
     const newSession = await prisma.chatSession.create({
       data: {
         lessonId: lesson.id,
         studentId: session.user.id,
-        name: 'Chat 1',
+        name: `Chat ${chatSessions.length + 1}`,
       },
       include: {
         messages: true,
@@ -84,7 +85,7 @@ export default async function StudentLessonPage({ params }: PageProps) {
         },
       },
     });
-    chatSessions = [newSession];
+    chatSessions.unshift(newSession);
   }
 
   // Fetch chatbot AI settings for maxMessagesPerChat
