@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { updateSystemPromptSchema, type UpdateSystemPromptInput } from '@/lib/validations/system-prompt';
@@ -41,8 +41,6 @@ export default function EditPromptModal({ isOpen, onClose, prompt }: EditPromptM
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [willDeactivateOthers, setWillDeactivateOthers] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const {
     register,
@@ -55,42 +53,8 @@ export default function EditPromptModal({ isOpen, onClose, prompt }: EditPromptM
   });
 
   const isActiveValue = watch('isActive');
-  const contentValue = watch('content');
 
-  // Detect desktop vs mobile (md breakpoint = 768px)
-  useEffect(() => {
-    const checkDesktop = () => setIsDesktop(window.innerWidth >= 768);
-    checkDesktop();
-    window.addEventListener('resize', checkDesktop);
-    return () => window.removeEventListener('resize', checkDesktop);
-  }, []);
-
-  // Auto-resize textarea to fit content (desktop only - prevents inner scrollbar)
-  const resizeTextarea = useCallback(() => {
-    if (!isDesktop) return; // Skip on mobile - use fixed height with scroll
-    const textarea = textareaRef.current;
-    if (textarea) {
-      // Reset height to auto to get the correct scrollHeight
-      textarea.style.height = 'auto';
-      // Set height to scrollHeight (content height)
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    }
-  }, [isDesktop]);
-
-  // Resize when content changes (desktop only)
-  useEffect(() => {
-    resizeTextarea();
-  }, [contentValue, resizeTextarea]);
-
-  // Resize when modal opens or screen size changes
-  useEffect(() => {
-    if (isOpen) {
-      // Small delay to ensure the textarea is rendered
-      setTimeout(resizeTextarea, 0);
-    }
-  }, [isOpen, isDesktop, resizeTextarea]);
-
-  // Check if this is a tutor prompt and if activating it will deactivate others
+  // Check if activating this tutor prompt will deactivate others
   useEffect(() => {
     if (prompt && isActiveValue && prompt.name.includes('tutor')) {
       setWillDeactivateOthers(true);
@@ -131,7 +95,6 @@ export default function EditPromptModal({ isOpen, onClose, prompt }: EditPromptM
         throw new Error(result.error || 'Failed to update prompt');
       }
 
-      // Success - close modal and refresh page
       onClose();
       router.refresh();
     } catch (err) {
@@ -141,7 +104,6 @@ export default function EditPromptModal({ isOpen, onClose, prompt }: EditPromptM
     }
   };
 
-  // Close and reset form
   const handleClose = () => {
     setError(null);
     setWillDeactivateOthers(false);
@@ -154,7 +116,7 @@ export default function EditPromptModal({ isOpen, onClose, prompt }: EditPromptM
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-150 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl lg:max-w-3xl xl:max-w-4xl max-h-[90vh] overflow-y-auto overflow-x-hidden min-w-0">
         <DialogHeader>
           <DialogTitle>Edit System Prompt</DialogTitle>
           <DialogDescription>
@@ -204,21 +166,10 @@ export default function EditPromptModal({ isOpen, onClose, prompt }: EditPromptM
           <div className="space-y-2">
             <Label htmlFor="content">Prompt Content *</Label>
             <Textarea
-              {...register('content', {
-                onChange: resizeTextarea,
-              })}
-              ref={(e) => {
-                // Combine react-hook-form ref with our ref
-                register('content').ref(e);
-                textareaRef.current = e;
-              }}
+              {...register('content')}
               id="content"
               placeholder="Enter the system prompt content..."
-              className={`
-                min-h-30 resize-none
-                ${isDesktop ? 'overflow-hidden' : 'h-48 overflow-y-auto'}
-                ${errors.content ? 'border-destructive' : ''}
-              `}
+              className={`min-h-30 resize-none wrap-anywhere${errors.content ? ' border-destructive' : ''}`}
             />
             {errors.content && (
               <p className="text-sm text-destructive">{errors.content.message}</p>
