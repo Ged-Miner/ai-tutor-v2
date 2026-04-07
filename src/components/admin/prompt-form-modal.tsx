@@ -105,7 +105,7 @@ export default function PromptFormModal({ isOpen, onClose }: PromptFormModalProp
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-2xl lg:max-w-3xl xl:max-w-4xl max-h-[90vh] overflow-y-auto overflow-x-hidden min-w-0">
         <DialogHeader>
           <DialogTitle>Create System Prompt</DialogTitle>
           <DialogDescription>
@@ -157,7 +157,7 @@ export default function PromptFormModal({ isOpen, onClose }: PromptFormModalProp
               id="content"
               rows={12}
               placeholder="You are a helpful AI tutor assistant..."
-              className={errors.content ? 'border-destructive' : ''}
+              className={`wrap-anywhere${errors.content ? ' border-destructive' : ''}`}
             />
             {errors.content && (
               <p className="text-sm text-destructive">{errors.content.message}</p>
